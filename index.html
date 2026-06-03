@@ -93,6 +93,9 @@ select option{background:#181826}
 <div id="pg-sculp" class="pg"></div>
 <div id="pg-cli" class="pg"></div>
 <div id="pg-proj" class="pg"></div>
+<div id="pg-cat" class="pg"></div>
+<div id="pg-orders" class="pg"></div>
+<div id="pg-portfolio" class="pg"></div>
 <div id="pg-msg" class="pg"></div>
 
 <nav class="nav">
@@ -102,6 +105,9 @@ select option{background:#181826}
   <button class="nb" onclick="go('sculp',this)"><span style="font-size:16px">🗿</span><span class="lbl">التسعير</span></button>
   <button class="nb" id="nb-proj" onclick="go('proj',this)"><span style="font-size:16px">🏗️</span><span class="lbl">المشاريع</span></button>
   <button class="nb" id="nb-cli" onclick="go('cli',this)"><span style="font-size:16px">👥</span><span class="lbl">العملاء</span></button>
+  <button class="nb" onclick="go('cat',this)"><span style="font-size:16px">🖼️</span><span class="lbl">الكتالوج</span></button>
+  <button class="nb" id="nb-orders" onclick="go('orders',this)"><span style="font-size:16px">📦</span><span class="lbl">الطلبات</span></button>
+  <button class="nb" onclick="go('portfolio',this)"><span style="font-size:16px">🎨</span><span class="lbl">بورتفوليو</span></button>
   <button class="nb" onclick="go('msg',this)"><span style="font-size:16px">✉️</span><span class="lbl">الرسائل</span></button>
 </nav>
 
@@ -243,6 +249,60 @@ select option{background:#181826}
   <button class="btn bg bfull" onclick="savePay()">💾 تسجيل</button>
   <button class="btn bo bfull" style="margin-top:8px" onclick="cm('m-pay')">إغلاق</button>
 </div></div>
+<!-- Modal: منتج كتالوج -->
+<div id="m-prod" class="mb" onclick="if(event.target===this)cm('m-prod')">
+<div class="md">
+  <h3 id="mprod-title">➕ منتج جديد</h3>
+  <input type="hidden" id="mprod-key"/>
+  <div class="fld"><label>اسم المنتج</label><input id="mprod-name" placeholder="تمثال أسد 80سم"/></div>
+  <div class="fld"><label>الوصف</label><textarea id="mprod-desc" style="min-height:55px;resize:vertical"></textarea></div>
+  <div class="g2">
+    <div class="fld"><label>النوع</label><select id="mprod-type" onchange="updMProdPrice()"><option value="sculp">تمثال</option><option value="grc">GRC</option><option value="fountain">نافورة</option><option value="pool">حوض</option><option value="other">أخرى</option></select></div>
+    <div class="fld"><label>التعقيد</label><select id="mprod-complexity" onchange="updMProdPrice()"><option value="simple">بسيط</option><option value="medium" selected>متوسط</option><option value="complex">معقد</option><option value="veryComplex">شديد</option></select></div>
+  </div>
+  <div class="g3">
+    <div class="fld"><label>الطول (سم)</label><input id="mprod-l" type="number" inputmode="decimal" onchange="updMProdPrice()"/></div>
+    <div class="fld"><label>العرض (سم)</label><input id="mprod-w" type="number" inputmode="decimal" onchange="updMProdPrice()"/></div>
+    <div class="fld"><label>الارتفاع (سم)</label><input id="mprod-h" type="number" inputmode="decimal" onchange="updMProdPrice()"/></div>
+  </div>
+  <div class="fld"><label>صورة المنتج</label>
+    <input type="file" id="mprod-img-file" accept="image/*" onchange="prevMProdImg(this)" style="padding:6px"/>
+    <div id="mprod-img-prev" style="margin-top:6px"></div>
+    <input type="hidden" id="mprod-img-data"/>
+  </div>
+  <div id="mprod-price-prev" style="display:none;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:9px;padding:10px;text-align:center;margin-bottom:12px;font-size:16px;font-weight:800;color:#C9A84C"></div>
+  <div class="fld"><label>رابط نموذج 3D (اختياري .glb)</label><input id="mprod-3d" placeholder="https://...model.glb" dir="ltr"/></div>
+  <div style="font-size:10px;color:#555;margin:-6px 0 10px;line-height:1.6">💡 ارفع ملف .glb على <a href="https://meshy.ai" target="_blank" style="color:#C9A84C">meshy.ai</a> أو <a href="https://tripo3d.ai" target="_blank" style="color:#C9A84C">tripo3d.ai</a> وانسخ الرابط هنا</div>
+  <button class="btn bg bfull" onclick="saveProd()">حفظ المنتج</button>
+  <button class="btn bo bfull" style="margin-top:7px" onclick="cm('m-prod')">إغلاق</button>
+</div></div>
+
+<!-- Modal: إعدادات الدفع -->
+<div id="m-payconf" class="mb" onclick="if(event.target===this)cm('m-payconf')">
+<div class="md"><h3>إعدادات الدفع</h3>
+  <div class="fld"><label>رقم إنستاباي</label><input id="pc-instapay" placeholder="01xxxxxxxxx"/></div>
+  <div class="fld"><label>اسم البنك</label><input id="pc-bankname" placeholder="بنك QNB"/></div>
+  <div class="fld"><label>اسم الحساب</label><input id="pc-accname" placeholder="Milano Art Studio"/></div>
+  <div class="fld"><label>رقم الحساب</label><input id="pc-accnum" placeholder="1234567890"/></div>
+  <div class="fld"><label>ملاحظات</label><textarea id="pc-notes" style="min-height:55px;resize:vertical"></textarea></div>
+  <button class="btn bg bfull" onclick="savePayConf()">حفظ</button>
+  <button class="btn bo bfull" style="margin-top:7px" onclick="cm('m-payconf')">إغلاق</button>
+</div></div>
+
+<!-- Modal: بورتفوليو -->
+<div id="m-port" class="mb" onclick="if(event.target===this)cm('m-port')">
+<div class="md"><h3>إضافة عمل للبورتفوليو</h3>
+  <div class="fld"><label>صورة العمل</label>
+    <input type="file" id="port-img-file" accept="image/*" onchange="prevPortImg(this)" style="padding:6px"/>
+    <div id="port-img-prev" style="margin-top:6px"></div>
+    <input type="hidden" id="port-img-data"/>
+  </div>
+  <div class="fld"><label>اسم العمل</label><input id="port-title" placeholder="تمثال أسد - فيلا الشيخ زايد"/></div>
+  <div class="fld"><label>الوصف</label><input id="port-desc" placeholder="فايبرجلاس - 2024"/></div>
+  <button class="btn bg bfull" onclick="savePort()">إضافة</button>
+  <button class="btn bo bfull" style="margin-top:7px" onclick="cm('m-port')">إغلاق</button>
+</div></div>
+
 
 <script>
 // ── Firebase Config ──
@@ -267,8 +327,11 @@ function fbSet(path, data, cb) {
   var xhr = new XMLHttpRequest();
   xhr.open('PUT', FB_URL + path + '.json', true);
   xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.onload = function() { if(cb) cb(); };
-  xhr.onerror = function(e) { console.error(e); };
+  xhr.onload = function() {
+    if(xhr.status>=200&&xhr.status<300){if(cb)cb();}
+    else{toast('❌ خطأ في الحفظ ('+ xhr.status +')');console.error('fbSet error',xhr.status,xhr.responseText);}
+  };
+  xhr.onerror = function(){toast('❌ تعذّر الاتصال بالسيرفر');};
   xhr.send(JSON.stringify(data));
 }
 function fbPush(path, data, cb) {
@@ -276,17 +339,22 @@ function fbPush(path, data, cb) {
   xhr.open('POST', FB_URL + path + '.json', true);
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.onload = function() {
-    try { var d = JSON.parse(xhr.responseText); if(cb) cb(d.name); }
-    catch(e) { console.error(e); }
+    if(xhr.status>=200&&xhr.status<300){
+      try{var d=JSON.parse(xhr.responseText);if(cb)cb(d.name);}
+      catch(e){console.error(e);}
+    } else {toast('❌ خطأ في الحفظ ('+ xhr.status +')');console.error('fbPush error',xhr.status,xhr.responseText);}
   };
-  xhr.onerror = function(e) { console.error(e); };
+  xhr.onerror = function(){toast('❌ تعذّر الاتصال بالسيرفر');};
   xhr.send(JSON.stringify(data));
 }
 function fbDel(path, cb) {
   var xhr = new XMLHttpRequest();
   xhr.open('DELETE', FB_URL + path + '.json', true);
-  xhr.onload = function() { if(cb) cb(); };
-  xhr.onerror = function(e) { console.error(e); };
+  xhr.onload = function() {
+    if(xhr.status>=200&&xhr.status<300){if(cb)cb();}
+    else{toast('❌ خطأ في الحذف ('+ xhr.status +')');console.error('fbDel error',xhr.status,xhr.responseText);}
+  };
+  xhr.onerror = function(){toast('❌ تعذّر الاتصال بالسيرفر');};
   xhr.send();
 }
 
@@ -350,7 +418,8 @@ var S={
   emSubj:'عرض خدمات الفايبرجلاس وGRC',
   emBody:'السادة المحترمين،\n\nيسعدنا تقديم خدماتنا:\n• أحواض السباحة الفايبرجلاس\n• واجهات وزخارف GRC\n• التماثيل والمجسمات\n• النوافير التزيينية\n\nجودة عالية وأسعار تنافسية.\n\nمع تحياتنا',
   selCli:[], cliFilter:'all', cliQ:'',
-  projects:{},
+  projects:{}, catalog:{}, clientOrders:{}, portfolio:[],
+  payConf:{instapay:'',bankName:'',accName:'',accNum:'',notes:''},
   revDist:[
     {label:'سداد المديونية',pct:30,color:'#E05555'},
     {label:'احتياطي رأس المال',pct:20,color:'#5888E0'},
@@ -361,7 +430,7 @@ var S={
 };
 
 // ── INIT - load from Firebase ──
-var TITLES={proj:'المشاريع القائمة',dash:'الرئيسية',fin:'الحسابات الشهرية',mats:'أسعار الخامات',sculp:'التسعير',cli:'إدارة العملاء',proj:'المشاريع القائمة',msg:'إعداد الرسائل'};
+var TITLES={dash:'الرئيسية',fin:'الحسابات الشهرية',mats:'أسعار الخامات',sculp:'التسعير',cat:'الكتالوج',orders:'طلبات العملاء',portfolio:'البورتفوليو',cli:'العملاء',proj:'المشاريع',msg:'الرسائل'};
 
 function initApp() {
   // date
@@ -378,7 +447,9 @@ function initApp() {
       var seed = {};
       DEF_CLIENTS.forEach(function(c,i){seed['c'+i]=c});
       S.clients = seed;
-      document.getElementById('loading').style.display='none';
+      // مراقبة الطلبات الجديدة
+    if(!window._ordCheck)window._ordCheck=setInterval(function(){fbGet('/data/clientOrders',function(e,d){if(!d)return;var p=Object.keys(S.clientOrders||{}).length;S.clientOrders=d;if(Object.keys(d).length>p){toast('\u{1F514} \u0637\u0644\u0628 \u062C\u062F\u064A\u062F!');updBadge();}});},25000);
+    document.getElementById('loading').style.display='none';
       document.getElementById('app').style.display='block';
       rDash();
       updBadge();
@@ -407,7 +478,11 @@ function initApp() {
       if (data.sf) S.sf = data.sf;
       if (data.waMsg) S.waMsg = data.waMsg;
       if (data.emSubj) S.emSubj = data.emSubj;
-      if (data.emBody) S.emBody = data.emBody;
+      if(data.emBody)S.emBody=data.emBody;
+      if(data.catalog)S.catalog=data.catalog;
+      if(data.clientOrders)S.clientOrders=data.clientOrders;
+      if(data.payConf)S.payConf=Object.assign({},S.payConf,data.payConf);
+      if(data.portfolio)S.portfolio=data.portfolio;
     } else {
       // first time - seed clients
       var seed = {};
@@ -415,6 +490,8 @@ function initApp() {
       S.clients = seed;
       fbSet('/data/clients', seed);
     }
+    // مراقبة الطلبات الجديدة
+    if(!window._ordCheck)window._ordCheck=setInterval(function(){fbGet('/data/clientOrders',function(e,d){if(!d)return;var p=Object.keys(S.clientOrders||{}).length;S.clientOrders=d;if(Object.keys(d).length>p){toast('\u{1F514} \u0637\u0644\u0628 \u062C\u062F\u064A\u062F!');updBadge();}});},25000);
     document.getElementById('loading').style.display='none';
     document.getElementById('app').style.display='block';
     rDash();
@@ -439,6 +516,9 @@ function go(id,btn){
   else if(id=='sculp')rSculp();
   else if(id=='cli')rCli();
   else if(id=='proj')rProj();
+  else if(id=='cat')rCatalog();
+  else if(id=='orders')rOrders();
+  else if(id=='portfolio')rPortfolio();
   else if(id=='msg')rMsg();
   updBadge();
 }
@@ -831,6 +911,9 @@ function updBadge(){
   var n=Object.values(S.clients||{}).filter(function(c){return c.status=='new'}).length;
   var b=document.getElementById('nb-cli');var bd=b.querySelector('.bdg');
   if(n>0){if(!bd){bd=document.createElement('span');bd.className='bdg';b.appendChild(bd)}bd.textContent=n}else if(bd)bd.remove();
+  var on2=Object.values(S.clientOrders||{}).filter(function(o){return o.status=='pending'}).length;
+  var ob=document.getElementById('nb-orders');var obd=ob?ob.querySelector('.bdg'):null;
+  if(on2>0){if(!obd&&ob){obd=document.createElement('span');obd.className='bdg';ob.appendChild(obd)}if(obd)obd.textContent=on2}else if(obd)obd.remove();
   var pn=Object.values(S.projects||{}).filter(function(p){return!p.done}).length;
   var pb=document.getElementById('nb-proj');
   if(pb){var pbd=pb.querySelector('.bdg');if(pn>0){if(!pbd){pbd=document.createElement('span');pbd.className='bdg';pb.appendChild(pbd)}pbd.textContent=pn}else if(pbd)pbd.remove()}
@@ -875,7 +958,7 @@ function rCli(){
   document.getElementById('pg-cli').innerHTML=h;
 }
 function togCli(k){var i=S.selCli.indexOf(k);if(i>=0)S.selCli.splice(i,1);else S.selCli.push(k);rCli()}
-function setCStatus(k,st){if(!S.clients[k])return;S.clients[k].status=st;fbSet('/data/clients/'+k+'/status',st);updBadge()}
+function setCStatus(k,st){if(!S.clients[k])return;S.clients[k].status=st;fbSet('/data/clients/'+k+'/status',st);updBadge();rCli()}
 function delCli(k){delete S.clients[k];fbDel('/data/clients/'+k,function(){rCli()})}
 function editCli(k){
   var c=S.clients[k];
@@ -1033,12 +1116,12 @@ function projCard(k,p,isDone){
   }
   if(!isDone){
     h+='<div style="display:flex;gap:7px;flex-wrap:wrap">';
-    h+='<button class="btn bsm bgr" onclick="openPay(this.dataset.k)" data-k='+k+'>💸 تسجيل دفعة</button>';
-    h+='<button class="btn bsm bor" onclick="doneProj(this.dataset.k)" data-k='+k+'>✅ إنهاء</button>';
-    h+='<button class="btn bsm br" onclick="delProj(this.dataset.k)" data-k='+k+'>🗑️</button>';
+    h+='<button class="btn bsm bgr" onclick="openPay(this.dataset.k)" data-k="'+k+'">💸 تسجيل دفعة</button>';
+    h+='<button class="btn bsm bor" onclick="doneProj(this.dataset.k)" data-k="'+k+'">✅ إنهاء</button>';
+    h+='<button class="btn bsm br" onclick="delProj(this.dataset.k)" data-k="'+k+'">🗑️</button>';
     h+='</div>';
   } else {
-    h+='<button class="btn bsm br" onclick="delProj(this.dataset.k)" data-k='+k+'>🗑️ حذف</button>';
+    h+='<button class="btn bsm br" onclick="delProj(this.dataset.k)" data-k="'+k+'">🗑️ حذف</button>';
   }
   h+='</div>';
   return h;
@@ -1072,6 +1155,296 @@ function delProj(k){if(!confirm('حذف المشروع؟'))return;delete S.proje
 function loadQ(k){S.sf=Object.assign({},JSON.parse(JSON.stringify(DEF_SCULP)),S.sculps[k]);save('sf',S.sf);rSculp();toast('📂 تم التحميل')}
 
 function seedClients(){var seed={};DEF_CLIENTS.forEach(function(c,i){seed['c'+i]=c});S.clients=seed;fbSet('/data/clients',seed)}
+
+
+// ── CATALOG MANAGEMENT ──
+
+function openPortModal(){
+  document.getElementById('port-img-data').value='';
+  document.getElementById('port-img-prev').innerHTML='';
+  document.getElementById('port-title').value='';
+  document.getElementById('port-desc').value='';
+  document.getElementById('m-port').classList.add('on');
+}
+function openProdModal(){document.getElementById('m-prod').classList.add('on')}
+
+function rCatalog(){
+  var arr=Object.entries(S.catalog||{});
+  var pc=S.payConf;
+  var pcInfo=pc.instapay?'إنستاباي: '+pc.instapay:pc.bankName?'بنك: '+pc.bankName:'لم تُضبط بعد';
+  var h='';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+  h+='<div style="font-size:14px;font-weight:700">🖼️ الكتالوج</div>';
+  h+='<button class="btn bg" style="padding:5px 12px;font-size:12px" onclick="openAddProd()">+ منتج</button></div>';
+  h+='<div class="card g" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">';
+  h+='<div><div style="font-size:12px;font-weight:700;color:#C9A84C">💳 إعدادات الدفع</div>';
+  h+='<div style="font-size:10px;color:#555;margin-top:2px">'+esc(pcInfo)+'</div></div>';
+  h+='<button class="btn bg" style="padding:5px 10px;font-size:11px" onclick="openPayConf()">⚙️ ضبط</button></div>';
+  if(!arr.length){
+    h+='<div class="card" style="text-align:center;padding:30px;color:#555">لا يوجد منتجات بعد<br><br><button class="btn bg" onclick="openAddProd()">+ أضف أول منتج</button></div>';
+  } else {
+    arr.forEach(function(kv){
+      var k=kv[0],p=kv[1];
+      var icon=p.type=='sculp'?'🗿':p.type=='grc'?'🏛️':p.type=='fountain'?'⛲':'🔷';
+      h+='<div class="card" style="margin-bottom:9px"><div style="display:flex;gap:10px;align-items:flex-start">';
+      if(p.img){h+='<img src="'+p.img+'" style="width:70px;height:70px;object-fit:cover;border-radius:9px;flex-shrink:0"/>';}
+      else{h+='<div style="width:70px;height:70px;background:#1E1E2E;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">'+icon+'</div>';}
+      h+='<div style="flex:1;min-width:0">';
+      h+='<div style="font-size:13px;font-weight:700">'+esc(p.name)+'</div>';
+      if(p.desc)h+='<div style="font-size:10px;color:#555;margin-top:1px">'+esc(p.desc)+'</div>';
+      h+='<div style="font-size:10px;color:#888;margin-top:2px">📐 '+esc(p.dims||'')+'</div>';
+      h+='<div style="font-size:16px;font-weight:800;color:#C9A84C;margin-top:4px">'+fmt(p.price)+' ج</div>';
+      h+='<div style="display:flex;gap:6px;margin-top:7px">';
+      h+='<button class="btn bo" style="padding:4px 10px;font-size:10px" id="ep_'+k+'" onclick="editProd(this.id.slice(3))">✏️ تعديل</button>';
+      h+='<button class="btn br" style="padding:4px 10px;font-size:10px" id="dp_'+k+'" onclick="delProd(this.id.slice(3))">🗑️</button>';
+      h+='</div></div></div></div>';
+    });
+  }
+  document.getElementById('pg-cat').innerHTML=h;
+}
+function openAddProd(){
+  document.getElementById('mprod-title').textContent='➕ منتج جديد';
+  document.getElementById('m-prod').classList.add('on');
+  document.getElementById('mprod-key').value='';
+  ['mprod-name','mprod-desc','mprod-l','mprod-w','mprod-h','mprod-3d'].forEach(function(id){document.getElementById(id).value=''});
+  document.getElementById('mprod-img-prev').innerHTML='';
+  document.getElementById('mprod-img-data').value='';
+  document.getElementById('mprod-price-prev').style.display='none';
+}
+function editProd(k){
+  var p=S.catalog[k];if(!p)return;
+  document.getElementById('mprod-title').textContent='✏️ تعديل المنتج';
+  document.getElementById('mprod-key').value=k;
+  document.getElementById('mprod-name').value=p.name||'';
+  document.getElementById('mprod-desc').value=p.desc||'';
+  document.getElementById('mprod-type').value=p.type||'sculp';
+  document.getElementById('mprod-complexity').value=p.complexity||'medium';
+  document.getElementById('mprod-l').value=p.l||'';
+  document.getElementById('mprod-w').value=p.w||'';
+  document.getElementById('mprod-h').value=p.h||'';
+  document.getElementById('mprod-img-data').value=p.img||'';
+  document.getElementById('mprod-3d').value=p.model3d||'';
+  if(p.img){document.getElementById('mprod-img-prev').innerHTML='<img src="'+p.img+'" style="width:100%;border-radius:9px;max-height:150px;object-fit:cover"/>';}
+  else{document.getElementById('mprod-img-prev').innerHTML='';}
+  updMProdPrice();
+  om('m-prod');
+}
+
+// ── ضغط الصور تلقائياً ──
+function autoCompress(inp, maxPx, quality, cb){
+  if(!inp.files||!inp.files[0]){return;}
+  var file = inp.files[0];
+  var sizeMB = file.size/1024/1024;
+  // لو الصورة أقل من 500KB اعملها compress خفيف
+  var q = sizeMB > 2 ? 0.6 : sizeMB > 1 ? 0.7 : 0.8;
+  var MAX = sizeMB > 3 ? 800 : maxPx || 900;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var img = new Image();
+    img.onload = function(){
+      var canvas = document.createElement('canvas');
+      var scale = Math.min(MAX/img.width, MAX/img.height, 1);
+      canvas.width = Math.round(img.width*scale);
+      canvas.height = Math.round(img.height*scale);
+      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      var compressed = canvas.toDataURL('image/jpeg', q);
+      var origKB = Math.round(file.size/1024);
+      var newKB = Math.round(compressed.length*0.75/1024);
+      if(cb) cb(compressed, origKB, newKB);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function prevMProdImg(inp){
+  autoCompress(inp, 900, 0.8, function(compressed, origKB, newKB){
+    document.getElementById('mprod-img-prev').innerHTML='<img src="'+compressed+'" style="width:100%;border-radius:9px;max-height:150px;object-fit:cover"/>'+'<div style="font-size:9px;color:#4DC97A;margin-top:4px">✅ تم ضغط الصورة: '+origKB+'KB ← '+newKB+'KB</div>';
+    document.getElementById('mprod-img-data').value=compressed;
+  });
+}
+function calcProdPrice(L,W,H,type,comp){
+  var m=S.mats;
+  var lbF={simple:.7,medium:1,complex:1.5,veryComplex:2.2}[comp]||1;
+  var surf=type=='grc'?L*W*1.3:2*(L*W+L*H+W*H)*1.3;
+  var totF=surf*.005*1e6*1.6/1000;
+  var fC=totF*.55*(m.fiber?m.fiber.price:45)+totF*.4*(m.mat?m.mat.price:35)+totF*.05*(m.hardener?m.hardener.price:20);
+  var finC=(m.duco?m.duco.price:80)*.3+(m.varnish?m.varnish.price:90)*.2+(m.tools?m.tools.price:50);
+  var lbC=2*(S.sf.lpday||300)*lbF;
+  return Math.round((fC+finC+lbC)*(1+((+S.sf.margin)||40)/100));
+}
+function updMProdPrice(){
+  var L=(+document.getElementById('mprod-l').value||0)/100;
+  var W=(+document.getElementById('mprod-w').value||0)/100;
+  var H=(+document.getElementById('mprod-h').value||0)/100;
+  if(!L||!W){document.getElementById('mprod-price-prev').style.display='none';return;}
+  var type=document.getElementById('mprod-type').value;
+  var comp=document.getElementById('mprod-complexity').value;
+  var p=calcProdPrice(L,W,H,type,comp);
+  var el=document.getElementById('mprod-price-prev');
+  el.textContent='السعر المحسوب: '+fmt(p)+' ج';
+  el.style.display='block';
+}
+function saveProd(){
+  var name=document.getElementById('mprod-name').value.trim();
+  if(!name){toast('أدخل اسم المنتج');return;}
+  var L=+document.getElementById('mprod-l').value||0;
+  var W=+document.getElementById('mprod-w').value||0;
+  var H=+document.getElementById('mprod-h').value||0;
+  var type=document.getElementById('mprod-type').value;
+  var comp=document.getElementById('mprod-complexity').value;
+  var pr=L&&W?calcProdPrice(L/100,W/100,H/100,type,comp):0;
+  var obj={name:name,desc:document.getElementById('mprod-desc').value,type:type,complexity:comp,l:L,w:W,h:H,dims:L+'x'+W+(H?'x'+H:'')+' سم',price:pr,img:document.getElementById('mprod-img-data').value,model3d:document.getElementById('mprod-3d').value||'',active:true,updAt:Date.now()};
+  var k=document.getElementById('mprod-key').value;
+  if(k){S.catalog[k]=obj;fbSet('/data/catalog/'+k,obj,function(){toast('تم التحديث');cm('m-prod');rCatalog();});}
+  else{fbPush('/data/catalog',obj,function(nk){S.catalog[nk]=obj;toast('تمت الإضافة');cm('m-prod');rCatalog();});}
+}
+function delProd(k){
+  if(!confirm('حذف المنتج؟'))return;
+  delete S.catalog[k];
+  fbDel('/data/catalog/'+k,function(){toast('تم الحذف');rCatalog();});
+}
+function openPayConf(){
+  var pc=S.payConf;
+  document.getElementById('pc-instapay').value=pc.instapay||'';
+  document.getElementById('pc-bankname').value=pc.bankName||'';
+  document.getElementById('pc-accname').value=pc.accName||'';
+  document.getElementById('pc-accnum').value=pc.accNum||'';
+  document.getElementById('pc-notes').value=pc.notes||'';
+  om('m-payconf');
+}
+function savePayConf(){
+  S.payConf={instapay:document.getElementById('pc-instapay').value,bankName:document.getElementById('pc-bankname').value,accName:document.getElementById('pc-accname').value,accNum:document.getElementById('pc-accnum').value,notes:document.getElementById('pc-notes').value};
+  fbSet('/data/payConf',S.payConf,function(){toast('تم حفظ إعدادات الدفع');cm('m-payconf');rCatalog();});
+}
+
+// ── CLIENT ORDERS ──
+function rOrders(){
+  var arr=Object.entries(S.clientOrders||{}).sort(function(a,b){return(b[1].ts||0)-(a[1].ts||0)});
+  var pending=arr.filter(function(kv){return kv[1].status=='pending';});
+  var others=arr.filter(function(kv){return kv[1].status!='pending';});
+  var totDel=arr.filter(function(kv){return kv[1].status=='delivered';}).reduce(function(a,kv){return a+(+kv[1].total||0);},0);
+  var h='<div style="font-size:14px;font-weight:700;margin-bottom:12px">📦 طلبات العملاء</div>';
+  h+='<div class="g3" style="margin-bottom:12px">';
+  h+='<div class="card" style="text-align:center;padding:10px"><div style="font-size:18px;font-weight:800;color:#E05555">'+pending.length+'</div><div style="font-size:9px;color:#555">جديد</div></div>';
+  h+='<div class="card" style="text-align:center;padding:10px"><div style="font-size:18px;font-weight:800;color:#C9A84C">'+arr.length+'</div><div style="font-size:9px;color:#555">إجمالي</div></div>';
+  h+='<div class="card" style="text-align:center;padding:10px"><div style="font-size:14px;font-weight:800;color:#4DC97A">'+fmt(totDel)+'</div><div style="font-size:9px;color:#555">تسليم ج</div></div>';
+  h+='</div>';
+  if(!arr.length){h+='<div class="card" style="text-align:center;padding:30px;color:#555">لا يوجد طلبات بعد</div>';document.getElementById('pg-orders').innerHTML=h;return;}
+  if(pending.length){
+    h+='<div style="font-size:11px;font-weight:700;color:#E05555;margin-bottom:8px">🔔 تنتظر موافقتك</div>';
+    pending.forEach(function(kv){h+=ordCard(kv[0],kv[1]);});
+  }
+  if(others.length){
+    h+='<div style="font-size:11px;font-weight:700;color:#555;margin:12px 0 8px">السابقة</div>';
+    others.forEach(function(kv){h+=ordCard(kv[0],kv[1]);});
+  }
+  document.getElementById('pg-orders').innerHTML=h;
+}
+function ordCard(k,o){
+  var stC={pending:'#E05555',confirmed:'#4DC97A',inprogress:'#C9A84C',delivered:'#5888E0',cancelled:'#555'};
+  var stL={pending:'جديد',confirmed:'مؤكد',inprogress:'قيد التنفيذ',delivered:'تم التسليم',cancelled:'ملغي'};
+  var sc=stC[o.status]||'#555';
+  var brd=o.status=='pending'?'rgba(224,85,85,0.35)':'#222';
+  var h='<div class="card" style="margin-bottom:10px;border-color:'+brd+'">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">';
+  h+='<div>';
+  h+='<div style="font-size:13px;font-weight:700">'+(o.client?esc(o.client.name):'عميل')+'</div>';
+  if(o.client&&o.client.phone)h+='<div style="font-size:10px;color:#888">📱 '+esc(o.client.phone)+'</div>';
+  if(o.client&&o.client.email)h+='<div style="font-size:10px;color:#888">📧 '+esc(o.client.email)+'</div>';
+  if(o.client&&o.client.city)h+='<div style="font-size:10px;color:#888">📍 '+esc(o.client.city)+'</div>';
+  h+='<div style="font-size:9px;color:#555;margin-top:2px">'+(o.ts?new Date(o.ts).toLocaleString('ar-EG'):'')+'</div>';
+  h+='</div>';
+  h+='<span style="border:1px solid '+sc+';color:'+sc+';font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px">'+stL[o.status]+'</span>';
+  h+='</div>';
+  if(o.items&&o.items.length){
+    h+='<div style="background:#181826;border-radius:9px;padding:9px;margin-bottom:8px">';
+    o.items.forEach(function(item){
+      h+='<div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid #1E1E2E">';
+      h+='<span style="color:#999">'+(item.emoji||'')+' '+esc(item.name)+' x'+item.qty+'</span>';
+      h+='<span style="color:#C9A84C;font-weight:700">'+fmt(item.price*item.qty)+' ج</span>';
+      h+='</div>';
+    });
+    h+='<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:800;padding:6px 0 0">';
+    h+='<span>الإجمالي</span><span style="color:#C9A84C">'+fmt(o.total)+' ج</span></div>';
+    h+='</div>';
+  }
+  if(o.customNotes){h+='<div style="font-size:11px;color:#888;padding:8px;background:#181826;border-radius:8px;margin-bottom:8px;line-height:1.6">📝 '+esc(o.customNotes)+'</div>';}
+  if(o.customImg){
+    h+='<div style="margin-bottom:8px"><div style="font-size:10px;color:#C9A84C;font-weight:700;margin-bottom:4px">📸 صورة التصميم المخصص</div>';
+    h+='<img src="'+o.customImg+'" style="width:100%;border-radius:9px;max-height:200px;object-fit:cover"/></div>';
+  }
+  if(o.receiptImg){
+    h+='<div style="margin-bottom:8px"><div style="font-size:10px;color:#4DC97A;font-weight:700;margin-bottom:4px">🧾 إيصال الدفع</div>';
+    h+='<img src="'+o.receiptImg+'" style="width:100%;border-radius:9px;max-height:180px;object-fit:cover"/></div>';
+  }
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">';
+  if(o.status=='pending'){
+    h+='<button class="btn bgr" style="padding:5px 10px;font-size:10px" id="oa_'+k+'" onclick="setOS(this.id.slice(3),this.dataset.s)" data-s="confirmed">✅ قبول</button>';
+    h+='<button class="btn br" style="padding:5px 10px;font-size:10px" id="ob_'+k+'" onclick="setOS(this.id.slice(3),this.dataset.s)" data-s="cancelled">✕ رفض</button>';
+  } else if(o.status=='confirmed'){
+    h+='<button class="btn bor" style="padding:5px 10px;font-size:10px" id="oc_'+k+'" onclick="setOS(this.id.slice(3),this.dataset.s)" data-s="inprogress">🔧 تنفيذ</button>';
+  } else if(o.status=='inprogress'){
+    h+='<button class="btn bb" style="padding:5px 10px;font-size:10px" id="od_'+k+'" onclick="setOS(this.id.slice(3),this.dataset.s)" data-s="delivered">📦 تسليم</button>';
+  }
+  if(o.client&&o.client.phone){
+    var n=o.client.phone.replace(/[^0-9]/g,'');
+    if(n.charAt(0)==='0')n='2'+n;
+    h+='<a href="https://wa.me/'+n+'" target="_blank" class="btn bgr" style="padding:5px 10px;font-size:10px;text-decoration:none">💬</a>';
+  }
+  h+='</div></div>';
+  return h;
+}
+function setOS(k,st){
+  if(!S.clientOrders[k])return;
+  S.clientOrders[k].status=st;
+  var msg={confirmed:'تم القبول',cancelled:'تم الرفض',inprogress:'قيد التنفيذ',delivered:'تم التسليم'};
+  fbSet('/data/clientOrders/'+k+'/status',st,function(){toast(msg[st]||'تم');rOrders();updBadge();});
+}
+
+// ── PORTFOLIO ──
+function rPortfolio(){
+  var arr=S.portfolio||[];
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+  h+='<div style="font-size:14px;font-weight:700">🎨 البورتفوليو</div>';
+  h+='<button class="btn bg" style="padding:5px 12px;font-size:12px" onclick="openPortModal()">+ إضافة</button></div>';
+  h+='<div style="font-size:11px;color:#888;background:#181826;border-radius:9px;padding:10px;margin-bottom:12px">الصور هنا تظهر في تطبيق العملاء كأعمال الشركة</div>';
+  if(!arr.length){
+    h+='<div class="card" style="text-align:center;padding:30px;color:#555">لا يوجد أعمال بعد<br><br><button class="btn bg" onclick="om(this.dataset.m)" data-m="m-port">+ أضف أول عمل</button></div>';
+  } else {
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+    arr.forEach(function(item,i){
+      h+='<div style="background:#121220;border:1px solid #222;border-radius:12px;overflow:hidden">';
+      h+='<img src="'+item.img+'" style="width:100%;height:130px;object-fit:cover"/>';
+      h+='<div style="padding:8px">';
+      h+='<div style="font-size:11px;font-weight:700">'+esc(item.title)+'</div>';
+      if(item.desc)h+='<div style="font-size:10px;color:#555;margin-top:2px">'+esc(item.desc)+'</div>';
+      h+='<button class="btn br" style="padding:3px 8px;font-size:9px;margin-top:6px" id="pdeli'+i+'" data-i="'+i+'" onclick="delPort(+this.dataset.i)">🗑️ حذف</button>';
+      h+='</div></div>';
+    });
+    h+='</div>';
+  }
+  document.getElementById('pg-portfolio').innerHTML=h;
+}
+function prevPortImg(inp){
+  autoCompress(inp, 1000, 0.8, function(compressed, origKB, newKB){
+    document.getElementById('port-img-prev').innerHTML='<img src="'+compressed+'" style="width:100%;border-radius:9px;max-height:180px;object-fit:cover"/>'+'<div style="font-size:9px;color:#4DC97A;margin-top:4px">✅ '+origKB+'KB → '+newKB+'KB</div>';
+    document.getElementById('port-img-data').value=compressed;
+  });
+}
+function savePort(){
+  var img=document.getElementById('port-img-data').value;
+  if(!img){toast('اختر صورة أولاً');return;}
+  var item={img:img,title:document.getElementById('port-title').value||'عمل جديد',desc:document.getElementById('port-desc').value,ts:Date.now()};
+  if(!S.portfolio)S.portfolio=[];
+  S.portfolio.push(item);
+  fbSet('/data/portfolio',S.portfolio,function(){toast('تمت الإضافة');cm('m-port');rPortfolio();});
+}
+function delPort(i){
+  if(!confirm('حذف هذه الصورة؟'))return;
+  S.portfolio.splice(i,1);
+  fbSet('/data/portfolio',S.portfolio,function(){toast('تم الحذف');rPortfolio();});
+}
 
 // ── INIT ──
 initApp();
