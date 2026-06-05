@@ -1468,6 +1468,76 @@ window.addEventListener('offline', updateOnlineStatus);
 // فحص أول ما الصفحة تفتح
 updateOnlineStatus();
 
+
+// ── تحديث تلقائي ──
+(function(){
+  // رقم الإصدار - بيتغير مع كل تحديث
+  var APP_VERSION = '1780653066';
+  
+  // فحص تحديث كل دقيقتين
+  function checkForUpdate(){
+    fetch(window.location.href + '?v=' + Date.now(), {cache: 'no-cache'})
+      .then(function(r){ return r.text(); })
+      .then(function(html){
+        var match = html.match(/APP_VERSION = '([^']+)'/);
+        if(match && match[1] !== APP_VERSION){
+          // في نسخة جديدة!
+          showUpdateBanner();
+        }
+      }).catch(function(){});
+  }
+  
+  function showUpdateBanner(){
+    var banner = document.createElement('div');
+    banner.id = 'update-banner';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#C9A84C;color:#000;text-align:center;padding:10px 16px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:space-between;direction:rtl';
+    banner.innerHTML = '<span>🔄 يوجد تحديث جديد!</span><button onclick="window.location.reload(true)" style="background:#000;color:#C9A84C;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:800;cursor:pointer">تحديث الآن</button>';
+    document.body.appendChild(banner);
+  }
+  
+  // تحديث فوري عند فتح التطبيق لو كان مغلقاً أكتر من 5 دقايق
+  var LAST_OPEN_KEY = 'app_last_open';
+  var lastOpen = localStorage.getItem(LAST_OPEN_KEY);
+  var now = Date.now();
+  localStorage.setItem(LAST_OPEN_KEY, now);
+  
+  if(lastOpen && (now - parseInt(lastOpen)) > 5 * 60 * 1000){
+    // كان مغلق أكتر من 5 دقايق - فحص تحديث فوري
+    setTimeout(checkForUpdate, 2000);
+  }
+  
+  // فحص دوري كل دقيقتين
+  setInterval(checkForUpdate, 2 * 60 * 1000);
+  
+  // Service Worker للتحديث التلقائي
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js').then(function(reg){
+      // فحص تحديث فوري
+      reg.update();
+      // فحص كل 60 ثانية
+      setInterval(function(){ reg.update(); }, 60000);
+      // لما يلاقي SW جديد - أعد التحميل
+      reg.addEventListener('updatefound', function(){
+        var newWorker = reg.installing;
+        newWorker.addEventListener('statechange', function(){
+          if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
+            showUpdateBanner();
+          }
+        });
+      });
+    }).catch(function(){});
+    
+    // لما يتحكم SW جديد - أعد التحميل تلقائي
+    var refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if(!refreshing){
+        refreshing = true;
+        window.location.reload();
+      }
+    });
+  }
+})();
+
 </script>
 </body>
 </html>
