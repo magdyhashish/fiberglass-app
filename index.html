@@ -117,7 +117,6 @@ select option{background:#fff;color:#1A2A3A}
     <button class="snb on" id="snb-dash" onclick="goS('dash')"><span class="snb-icon">📊</span>الرئيسية</button>
     <button class="snb" id="snb-fin" onclick="goS('fin')"><span class="snb-icon">💰</span>الحسابات</button>
     <button class="snb" id="snb-mats" onclick="goS('mats')"><span class="snb-icon">⚗️</span>الخامات</button>
-    <button class="snb" id="snb-custmats" onclick="goS('custmats')"><span class="snb-icon">🧪</span>خامات التصاميم</button>
     <button class="snb" id="snb-sculp" onclick="goS('sculp')"><span class="snb-icon">🗿</span>التسعير</button>
     <button class="snb" id="snb-proj" onclick="goS('proj')"><span class="snb-icon">🏗️</span>المشاريع</button>
     <button class="snb" id="snb-cli" onclick="goS('cli')"><span class="snb-icon">👥</span>العملاء<span id="cli-badge" class="snb-badge" style="display:none"></span></button>
@@ -141,7 +140,6 @@ select option{background:#fff;color:#1A2A3A}
 <div id="pg-dash" class="pg on"></div>
 <div id="pg-fin" class="pg"></div>
 <div id="pg-mats" class="pg"></div>
-<div id="pg-custmats" class="pg"></div>
 <div id="pg-sculp" class="pg"></div>
 <div id="pg-cli" class="pg"></div>
 <div id="pg-proj" class="pg"></div>
@@ -279,31 +277,12 @@ select option{background:#fff;color:#1A2A3A}
       <option value="finish">دوكو وتشطيب</option>
       <option value="varnish">ورنيش وأخرى</option>
       <option value="tools">أدوات</option>
+      <option value="molds">قوالب</option>
       <option value="custom">خامات مضافة</option>
     </select>
   </div>
   <button class="btn bg bfull" onclick="addNewMat()">💾 إضافة</button>
   <button class="btn bo bfull" style="margin-top:8px" onclick="cm('m-newmat')">إغلاق</button>
-</div></div>
-
-<!-- Modal: خامة جديدة للتصاميم الخاصة -->
-<div id="m-newcustmat" class="mb" onclick="if(event.target===this)cm('m-newcustmat')">
-<div class="md"><h3>🧪 خامة جديدة للتصاميم</h3>
-  <div class="fld"><label>اسم الخامة</label><input id="nkm-name" placeholder="مثال: قالب سيليكون خاص"/></div>
-  <div class="g2">
-    <div class="fld"><label>السعر (ج/كيلو)</label><input id="nkm-price" type="number" placeholder="0"/></div>
-    <div class="fld"><label>الوحدة</label><input id="nkm-unit" placeholder="كيلو"/></div>
-  </div>
-  <div class="fld"><label>النوع</label>
-    <select id="nkm-group">
-      <option value="molds">قالب</option>
-      <option value="fiber">فيبرجلاس</option>
-      <option value="finish">تشطيب</option>
-      <option value="custom">أخرى</option>
-    </select>
-  </div>
-  <button class="btn bg bfull" onclick="addNewCustMat()">💾 إضافة</button>
-  <button class="btn bo bfull" style="margin-top:8px" onclick="cm('m-newcustmat')">إغلاق</button>
 </div></div>
 
 <!-- Modal: إرسال جماعي -->
@@ -489,7 +468,10 @@ var DEF_MATS={
   grc_cement:{name:'أسمنت GRC',unit:'كيلو',price:8,color:'#C9A84C'},
   grc_sand:{name:'رمل ناعم GRC',unit:'كيلو',price:2,color:'#C9A84C'},
   grc_glass:{name:'ألياف زجاج GRC',unit:'كيلو',price:80,color:'#C9A84C'},
-  grc_steel:{name:'حديد شبكي GRC',unit:'كيلو',price:25,color:'#C9A84C'}
+  grc_steel:{name:'حديد شبكي GRC',unit:'كيلو',price:25,color:'#C9A84C'},
+  mold_gypsum:{name:'قالب جبس',unit:'كيلو',price:15,color:'#9E9880',group:'molds'},
+  mold_rubber:{name:'قالب ربر (سيليكون)',unit:'كيلو',price:180,color:'#9E9880',group:'molds'},
+  mold_fiber:{name:'قالب فيبرجلاس',unit:'كيلو',price:55,color:'#5888E0',group:'molds'}
 };
 var DEF_SCULP={pricingType:'sculp',name:'',complexity:'medium',length:80,lu:'سم',width:50,wu:'سم',height:80,hu:'سم',depth:30,du2:'سم',thick:5,tu:'مم',newmold:false,manual:false,fkg:0,fu:'كيلو',mkg:0,mu:'كيلو',hkg:0,hhu:'كيلو',gkg:0,gu:'كيلو',dkg:0,du:'كيلو',skg:0,su:'كيلو',vkg:0,vu:'كيلو',acrylicSheets:{},acrylicThick:'3',acm2:0,okg:0,ou:'كيلو',tqty:1,ldays:2,lpday:300,pkg:0,ship:0,margin:60,qty:1,payments:[{pct:70,label:'الدفعة الأولى'},{pct:20,label:'الدفعة الثانية'},{pct:10,label:'التسليم'}]};
 var DEF_CLIENTS=[
@@ -518,7 +500,6 @@ var EM_BODY='السادة المحترمين،\n\nيسعدنا تقديم خدم
 // ── state ──
 var S={
   expenses:{}, debt:{}, mats:JSON.parse(JSON.stringify(DEF_MATS)),
-  custmats:{},
   clients:{}, revenue:'', sculps:{},
   sf:JSON.parse(JSON.stringify(DEF_SCULP)),
   waMsg:'السلام عليكم،\n\nمتخصصون في أعمال الفايبرجلاس وGRC:\n🏊 أحواض سباحة\n🏛️ واجهات GRC\n🗿 تماثيل ومجسمات\n💧 نوافير وبرك\n\nجودة عالية مع ضمان ✅\nعرض سعر مجاني 🤝',
@@ -537,15 +518,7 @@ var S={
 };
 
 // ── INIT - load from Firebase ──
-var TITLES={dash:'الرئيسية',fin:'الحسابات الشهرية',mats:'أسعار الخامات',custmats:'خامات التصاميم الخاصة',sculp:'التسعير',cat:'الكتالوج',orders:'طلبات العملاء',portfolio:'البورتفوليو',cli:'العملاء',proj:'المشاريع',msg:'الرسائل'};
-// خامات التصاميم الخاصة الافتراضية (+ قوالب)
-var DEF_CUSTMATS=JSON.parse(JSON.stringify(DEF_MATS));
-DEF_CUSTMATS.mold_gypsum={name:'قالب جبس',unit:'كيلو',price:15,color:'#9E9880',group:'molds'};
-DEF_CUSTMATS.mold_rubber={name:'قالب ربر (سيليكون)',unit:'كيلو',price:180,color:'#9E9880',group:'molds'};
-DEF_CUSTMATS.mold_fiber={name:'قالب فيبرجلاس',unit:'كيلو',price:55,color:'#5888E0',group:'molds'};
-
-// تهيئة بعد تعريف الافتراضيات
-S.custmats = JSON.parse(JSON.stringify(DEF_CUSTMATS));
+var TITLES={dash:'الرئيسية',fin:'الحسابات الشهرية',mats:'أسعار الخامات',sculp:'التسعير',cat:'الكتالوج',orders:'طلبات العملاء',portfolio:'البورتفوليو',cli:'العملاء',proj:'المشاريع',msg:'الرسائل'};
 
 function initApp() {
   // date
@@ -579,7 +552,6 @@ function initApp() {
       // البيانات محفوظة في Firebase وستُحمَّل عند عودة الاتصال
       S.clients = S.clients || {};
       S.mats = S.mats || JSON.parse(JSON.stringify(DEF_MATS));
-      S.custmats = S.custmats || JSON.parse(JSON.stringify(DEF_CUSTMATS));
       // مراقبة الطلبات الجديدة
       if(!window._ordCheck)window._ordCheck=setInterval(function(){fbGet('/data/clientOrders',function(e,d){if(!d)return;var p=Object.keys(S.clientOrders||{}).length;S.clientOrders=d;if(Object.keys(d).length>p){toast('\u{1F514} \u0637\u0644\u0628 \u062C\u062F\u064A\u062F!');updBadge();}});},25000);
       // إعادة المحاولة بعد 5 ثوان
@@ -594,19 +566,29 @@ function initApp() {
     if (data) {
       if (data.expenses) S.expenses = data.expenses;
       if (data.debt) S.debt = data.debt;
-      if (data.mats) {
-        S.mats = data.mats;
-        // إضافة أي خامة جديدة من الإعدادات الافتراضية غير موجودة في Firebase
+      if (data.mats || data.catmats || data.custmats) {
+        S.mats = data.mats || {};
+        var migratedLegacy=false;
+        // ترحيل أي بيانات قديمة محفوظة تحت "خامات الكتالوج" أو "خامات التصاميم"
+        // (نسخة قديمة من التطبيق) — تُستخدم فقط لإكمال أي خامة غير موجودة
+        // حالياً في "أسعار الخامات" (مثل القوالب أو خامات مضافة قديمة)، بدون
+        // التأثير على الأسعار الأساسية المحفوظة فعلاً في data.mats
+        if (data.catmats) {
+          Object.keys(data.catmats).forEach(function(k){
+            if (S.mats[k] === undefined) { S.mats[k] = data.catmats[k]; migratedLegacy = true; }
+          });
+        }
+        if (data.custmats) {
+          Object.keys(data.custmats).forEach(function(k){
+            if (S.mats[k] === undefined) { S.mats[k] = data.custmats[k]; migratedLegacy = true; }
+          });
+        }
+        // إضافة أي خامة جديدة من الإعدادات الافتراضية غير موجودة بعد الترحيل
         Object.keys(DEF_MATS).forEach(function(k){
           if(!S.mats[k]) S.mats[k]=JSON.parse(JSON.stringify(DEF_MATS[k]));
         });
-      }
-      if (data.custmats) {
-        S.custmats = data.custmats;
-        // إضافة أي خامة مخصصة جديدة غير موجودة في Firebase
-        Object.keys(DEF_CUSTMATS).forEach(function(k){
-          if(!S.custmats[k]) S.custmats[k]=JSON.parse(JSON.stringify(DEF_CUSTMATS[k]));
-        });
+        // حفظ النتيجة المدمجة فوراً في المكان الجديد عشان مفيش بيانات تضيع
+        if (migratedLegacy) fbSet('/data/mats', S.mats);
       }
       if (data.clients) {
         S.clients = data.clients;
@@ -633,10 +615,8 @@ function initApp() {
       // Firebase موجود لكن data فارغة — نبدأ بقواعد بيانات نظيفة
       S.clients = {};
       S.mats = JSON.parse(JSON.stringify(DEF_MATS));
-      S.custmats = JSON.parse(JSON.stringify(DEF_CUSTMATS));
       // نحفظ الخامات الافتراضية فقط
       fbSet('/data/mats', S.mats);
-      fbSet('/data/custmats', S.custmats);
     }
     // مراقبة الطلبات الجديدة
     if(!window._ordCheck)window._ordCheck=setInterval(function(){fbGet('/data/clientOrders',function(e,d){if(!d)return;var p=Object.keys(S.clientOrders||{}).length;S.clientOrders=d;if(Object.keys(d).length>p){toast('\u{1F514} \u0637\u0644\u0628 \u062C\u062F\u064A\u062F!');updBadge();}});},25000);
@@ -671,7 +651,6 @@ function goS(id){
   if(id=='dash')rDash();
   else if(id=='fin')rFin();
   else if(id=='mats')rMats();
-  else if(id=='custmats')rCustMats();
   else if(id=='sculp')rSculp();
   else if(id=='cli')rCli();
   else if(id=='proj')rProj();
@@ -749,7 +728,7 @@ function payD(k,amt){S.debt[k].remaining=Math.max(0,(+S.debt[k].remaining||0)-am
 
 // ── MATERIALS ──
 function rMats(){
-  var groups=[{l:'🔵 خامات الفيبرجلاس',keys:['fiber','mat','hardener']},{l:'🟠 دوكو وتشطيب',keys:['duco','stouk']},{l:'🟢 ورنيش',keys:['varnish']},{l:'🟣 أكريليك وجبس وأخرى',keys:['acrylic','gypsum','other']},{l:'⚙️ أدوات',keys:['tools']},{l:'🏛️ خامات GRC',keys:['grc_cement','grc_sand','grc_glass','grc_steel']}];
+  var groups=[{l:'🔵 خامات الفيبرجلاس',keys:['fiber','mat','hardener']},{l:'🟠 دوكو وتشطيب',keys:['duco','stouk']},{l:'🟢 ورنيش',keys:['varnish']},{l:'🟣 أكريليك وجبس وأخرى',keys:['acrylic','gypsum','other']},{l:'⚙️ أدوات',keys:['tools']},{l:'🏛️ خامات GRC',keys:['grc_cement','grc_sand','grc_glass','grc_steel']},{l:'🧩 القوالب (جبس / ربر / فيبر)',keys:['mold_gypsum','mold_rubber','mold_fiber']}];
   var h='<div style="font-size:14px;font-weight:700;margin-bottom:14px">⚗️ أسعار الخامات</div>';
   h+='<div class="card g" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#C9A84C;margin-bottom:8px">تغيير كل الأسعار بنسبة %</div><div style="display:flex;gap:8px;align-items:center"><input type="number" id="pct-in" style="flex:1;text-align:center;direction:ltr" placeholder="+10 أو -5"/><span style="color:#555">%</span><button class="btn bg bsm" onclick="applyPct()">تطبيق</button></div></div>';
   groups.forEach(function(g){
@@ -818,74 +797,6 @@ function saveMat(k){
 }
 function applyPct(){var p=+document.getElementById('pct-in').value;if(!p){toast('⚠️ أدخل النسبة');return}Object.keys(S.mats).forEach(function(k){S.mats[k].price=Math.round(S.mats[k].price*(1+p/100))});save('mats',S.mats);document.getElementById('pct-in').value='';toast('✅ تم '+(p>0?'+':'')+p+'%');rMats()}
 
-// ── خامات التصاميم الخاصة ──
-function rCustMats(){
-  var stdGroups=[
-    {l:'🔵 خامات الفيبرجلاس',keys:['fiber','mat','hardener']},
-    {l:'🟠 دوكو وتشطيب',keys:['duco','stouk']},
-    {l:'🟢 ورنيش',keys:['varnish']},
-    {l:'🟣 أكريليك وجبس وأخرى',keys:['acrylic','gypsum','other']},
-    {l:'⚙️ أدوات',keys:['tools']},
-    {l:'🏛️ خامات GRC',keys:['grc_cement','grc_sand','grc_glass','grc_steel']}
-  ];
-  var moldKeys=['mold_gypsum','mold_rubber','mold_fiber'];
-  var h='<div class="card g" style="margin-bottom:12px;background:rgba(107,63,160,0.08);border-color:rgba(107,63,160,0.2)">';
-  h+='<div style="font-size:11px;color:#6B3FA0;font-weight:700;margin-bottom:4px">💡 خامات التصاميم والقوالب المخصصة</div>';
-  h+='<div style="font-size:10px;color:#888">مستقلة تماماً عن خامات الكتالوج — خصصها للتصاميم الخاصة</div></div>';
-  h+='<div class="card g" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#6B3FA0;margin-bottom:8px">تغيير كل الأسعار بنسبة %</div>';
-  h+='<div style="display:flex;gap:8px;align-items:center"><input type="number" id="custpct-in" style="flex:1;text-align:center;direction:ltr" placeholder="+10 أو -5"/><span style="color:#888">%</span><button class="btn bg bsm" onclick="applyCustPct()">تطبيق</button></div></div>';
-  // قوالب
-  h+='<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#6B3FA0;margin-bottom:8px">🧩 القوالب (جبس / ربر / فيبر)</div>';
-  moldKeys.forEach(function(k){
-    var m=S.custmats[k];if(!m)return;
-    h+='<div id="ksr-'+k+'" style="background:rgba(255,255,255,0.85);border:1px solid rgba(107,63,160,0.2);border-radius:12px;padding:11px 14px;margin-bottom:7px"><div style="display:flex;justify-content:space-between;align-items:center"><div style="flex:1"><div style="font-size:13px;font-weight:700;color:#6B3FA0">'+esc(m.name)+'</div><div style="font-size:10px;color:#888">لكل '+esc(m.unit)+'</div><span style="font-size:16px;font-weight:800;color:#6B3FA0">'+fmt(m.price)+' ج</span></div><button class="btn bsm bo" onclick="editCustMat(\''+k+'\')">✏️</button></div></div>';
-  });
-  h+='</div>';
-  // الخامات الأساسية
-  stdGroups.forEach(function(g){
-    h+='<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#888;margin-bottom:8px">'+g.l+'</div>';
-    g.keys.forEach(function(k){
-      var m=S.custmats[k];if(!m)return;
-      var priceInfo=k==='acrylic'&&m.thickPrices?'<div style="font-size:9px;color:#6B3FA0;margin-top:3px">'+Object.entries(m.thickPrices).filter(function(e){return+e[1]>0}).map(function(e){return e[0]+'مم: '+fmt(e[1])+'ج'}).join(' | ')+'</div>':'<span style="font-size:16px;font-weight:800;color:#6B3FA0">'+fmt(m.price)+' ج</span>';
-      h+='<div id="ksr-'+k+'" style="background:rgba(255,255,255,0.8);border:1px solid #B8D8EC;border-radius:12px;padding:11px 14px;margin-bottom:7px"><div style="display:flex;justify-content:space-between;align-items:center"><div style="flex:1"><div style="font-size:13px;font-weight:700;color:#1A2A3A">'+esc(m.name)+'</div><div style="font-size:10px;color:#888">لكل '+esc(m.unit)+'</div>'+priceInfo+'</div><button class="btn bsm bo" onclick="editCustMat(\''+k+'\')">✏️</button></div></div>';
-    });
-    h+='</div>';
-  });
-  // خامات مخصصة مضافة
-  var custKeys=Object.keys(S.custmats).filter(function(k){return k.startsWith('cxk_')});
-  if(custKeys.length>0){
-    h+='<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#6B3FA0;margin-bottom:8px">⭐ خامات مضافة</div>';
-    custKeys.forEach(function(k){
-      var m=S.custmats[k];
-      h+='<div id="ksr-'+k+'" style="background:rgba(255,255,255,0.8);border:1px solid rgba(107,63,160,0.25);border-radius:12px;padding:11px 14px;margin-bottom:7px"><div style="display:flex;justify-content:space-between;align-items:center"><div style="flex:1"><div style="font-size:13px;font-weight:700;color:#6B3FA0">'+esc(m.name)+'</div><div style="font-size:10px;color:#888">لكل '+esc(m.unit)+'</div><span style="font-size:16px;font-weight:800;color:#6B3FA0">'+fmt(m.price)+' ج</span></div><div style="display:flex;gap:6px"><button class="btn bsm bo" onclick="editCustMat(\''+k+'\')">✏️</button><button class="btn bsm br" onclick="delCustMat(\''+k+'\')">🗑️</button></div></div></div>';
-    });
-    h+='</div>';
-  }
-  h+='<button class="btn bg bfull" onclick="om(\'m-newcustmat\')" style="margin-bottom:20px">➕ إضافة خامة للتصاميم</button>';
-  document.getElementById('pg-custmats').innerHTML=h;
-}
-function editCustMat(k){
-  var m=S.custmats[k];var el=document.getElementById('ksr-'+k);
-  el.style.borderColor='rgba(107,63,160,0.4)';
-  var html='<div class="fld"><label>الاسم</label><input id="ken-'+k+'" value="'+esc(m.name)+'"/></div>';
-  if(k==='acrylic'&&m.thickPrices){
-    html+='<div style="font-size:10px;font-weight:700;color:#6B3FA0;margin:8px 0 6px">سعر اللوح لكل سماكة</div><div class="g2">';
-    ['3','4','5','6','8','10','12','15','20'].forEach(function(t){html+='<div class="fld"><label>'+t+' مم</label><input id="ketp-'+k+'-'+t+'" type="number" value="'+((m.thickPrices&&m.thickPrices[t])||0)+'"/></div>';});
-    html+='</div>';
-  } else {
-    html+='<div class="g2"><div class="fld"><label>السعر (ج/كيلو أو وحدة)</label><input id="kep-'+k+'" type="number" value="'+m.price+'"/></div><div class="fld"><label>الوحدة</label><input id="keu-'+k+'" value="'+esc(m.unit)+'"/></div></div>';
-  }
-  html+='<div style="display:flex;gap:7px"><button class="btn bg bsm" onclick="saveCustMat(\''+k+'\')">💾 حفظ</button><button class="btn bsm bo" onclick="rCustMats()">إلغاء</button></div>';
-  el.innerHTML=html;
-}
-function saveCustMat(k){
-  var n=document.getElementById('ken-'+k).value;
-  if(k==='acrylic'){var tp={};['3','4','5','6','8','10','12','15','20'].forEach(function(t){var e=document.getElementById('ketp-'+k+'-'+t);if(e)tp[t]=+e.value||0;});S.custmats[k]=Object.assign({},S.custmats[k],{name:n,thickPrices:tp});}
-  else{var p=+(document.getElementById('kep-'+k)||{value:0}).value||0;var u=(document.getElementById('keu-'+k)||{value:''}).value;S.custmats[k]=Object.assign({},S.custmats[k],{name:n,price:p,unit:u});}
-  fbSet('/data/custmats',S.custmats);toast('✅ تم');rCustMats();
-}
-function delCustMat(k){if(!confirm('حذف؟'))return;delete S.custmats[k];fbSet('/data/custmats',S.custmats);toast('تم الحذف');rCustMats();}
-function applyCustPct(){var p=+document.getElementById('custpct-in').value;if(!p){toast('⚠️ أدخل النسبة');return}Object.keys(S.custmats).forEach(function(k){if(S.custmats[k].price)S.custmats[k].price=Math.round(S.custmats[k].price*(1+p/100))});fbSet('/data/custmats',S.custmats);toast('✅ '+(p>0?'+':'')+p+'%');rCustMats();}
 
 // ── SCULPTURE ──
 function getAcrylicPrice(){
@@ -1418,25 +1329,12 @@ function addNewMat(){
   var g=document.getElementById('nm-group').value;
   if(!n){toast('⚠️ أدخل اسم الخامة');return}
   var key='cx_'+Date.now();
-  var colors={fiber:'#5888E0',finish:'#E09840',varnish:'#4DC97A',tools:'#9E9880',custom:'#C9A84C'};
+  var colors={fiber:'#5888E0',finish:'#E09840',varnish:'#4DC97A',tools:'#9E9880',molds:'#9E9880',custom:'#C9A84C'};
   S.mats[key]={name:n,price:p,unit:u,group:g,color:colors[g]||'#C9A84C'};
   save('mats',S.mats);
   cm('m-newmat');
   ['nm-name','nm-price','nm-unit'].forEach(function(id){document.getElementById(id).value=''});
   toast('✅ تمت الإضافة');rMats();
-}
-function addNewCustMat(){
-  var n=document.getElementById('nkm-name').value.trim();
-  var p=+document.getElementById('nkm-price').value||0;
-  var u=document.getElementById('nkm-unit').value||'كيلو';
-  var g=document.getElementById('nkm-group').value;
-  if(!n){toast('⚠️ أدخل اسم الخامة');return}
-  var key='cxk_'+Date.now();
-  S.custmats[key]={name:n,price:p,unit:u,group:g,color:'#6B3FA0'};
-  fbSet('/data/custmats',S.custmats);
-  cm('m-newcustmat');
-  ['nkm-name','nkm-price','nkm-unit'].forEach(function(id){document.getElementById(id).value=''});
-  toast('✅ تمت الإضافة');rCustMats();
 }
 function delMat(k){if(confirm('حذف هذه الخامة؟')){delete S.mats[k];save('mats',S.mats);toast('✅ تم الحذف');rMats()}}
 
@@ -1684,10 +1582,10 @@ function rCatalog(){
       h+='<div style="font-size:10px;color:#888;margin-top:2px">📐 '+esc(p.dims||'')+'</div>';
       // عرض الخامات المستخدمة كـ badges
       if(p.usedMats&&p.usedMats.length>0){
-        var iconMap={fiber:'🧴',mat:'🪡',hardener:'⚗️',duco:'🎨',stouk:'🪣',varnish:'✨',acrylic:'🔲',gypsum:'🪨',tools:'🔧',other:'📦',grc_cement:'🏗️',grc_sand:'🏖️',grc_glass:'🔩',grc_steel:'⚙️'};
+        var iconMap={fiber:'🧴',mat:'🪡',hardener:'⚗️',duco:'🎨',stouk:'🪣',varnish:'✨',acrylic:'🔲',gypsum:'🪨',tools:'🔧',other:'📦',grc_cement:'🏗️',grc_sand:'🏖️',grc_glass:'🔩',grc_steel:'⚙️',mold_gypsum:'🧱',mold_rubber:'🟤',mold_fiber:'🧪'};
         h+='<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:5px">';
         p.usedMats.forEach(function(mk){
-          var mat=S.custmats[mk];if(!mat)return;
+          var mat=S.mats[mk];if(!mat)return;
           var ico=iconMap[mk]||'🔹';
           h+='<span style="display:inline-flex;align-items:center;gap:2px;background:rgba(26,111,160,0.1);border:1px solid rgba(26,111,160,0.2);border-radius:20px;padding:2px 7px;font-size:9px;font-weight:700;color:#1A6FA0">'+ico+' '+esc(mat.name)+'</span>';
         });
@@ -1890,15 +1788,15 @@ function defMatsForType(type){
 
 // ── رسم قائمة checkboxes الخامات في المودال ──
 function renderMatsList(selectedKeys){
-  var m=S.custmats;
+  var m=S.mats;
   var keys=Object.keys(m);
   // ترتيب: الخامات الأساسية أولاً ثم المضافة
-  var stdOrder=['fiber','mat','hardener','duco','stouk','varnish','acrylic','gypsum','tools','other','grc_cement','grc_sand','grc_glass','grc_steel'];
+  var stdOrder=['fiber','mat','hardener','duco','stouk','varnish','acrylic','gypsum','tools','other','grc_cement','grc_sand','grc_glass','grc_steel','mold_gypsum','mold_rubber','mold_fiber'];
   var ordered=stdOrder.filter(function(k){return m[k]});
   var extras=keys.filter(function(k){return stdOrder.indexOf(k)<0});
   var allKeys=ordered.concat(extras);
 
-  var iconMap={fiber:'🧴',mat:'🪡',hardener:'⚗️',duco:'🎨',stouk:'🪣',varnish:'✨',acrylic:'🔲',gypsum:'🪨',tools:'🔧',other:'📦',grc_cement:'🏗️',grc_sand:'🏖️',grc_glass:'🔩',grc_steel:'⚙️'};
+  var iconMap={fiber:'🧴',mat:'🪡',hardener:'⚗️',duco:'🎨',stouk:'🪣',varnish:'✨',acrylic:'🔲',gypsum:'🪨',tools:'🔧',other:'📦',grc_cement:'🏗️',grc_sand:'🏖️',grc_glass:'🔩',grc_steel:'⚙️',mold_gypsum:'🧱',mold_rubber:'🟤',mold_fiber:'🧪'};
   var h='';
   allKeys.forEach(function(k){
     var mat=m[k];if(!mat)return;
@@ -1948,7 +1846,7 @@ function getCheckedMats(){
 }
 
 function calcProdPrice(L,W,H,type,comp,usedMatsKeys){
-  var m=S.custmats||S.mats;
+  var m=S.mats;
   var catMargin=(S.payConf&&S.payConf.catMargin!==undefined)?+S.payConf.catMargin:40;
   var lbF={simple:.7,medium:1,complex:1.5,veryComplex:2.2}[comp]||1;
   var surf=type=='grc'?L*W*1.3:2*(L*W+L*H+W*H)*1.3;
@@ -2266,7 +2164,6 @@ updateOnlineStatus();
       safeSave('debt',       S.debt);
       safeSave('revenue',    S.revenue);
       safeSave('mats',       S.mats);
-      safeSave('custmats',   S.custmats);
       safeSave('sculps',     S.sculps);
       safeSave('projects',   S.projects);
       safeSave('revDist',    S.revDist);
