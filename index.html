@@ -330,26 +330,20 @@ select option{background:#fff;color:#1A2A3A}
   <div class="fld"><label>اسم المنتج *</label><input id="mprod-name" placeholder="مثال: تمثال KAWS واقف"/></div>
   <div class="fld"><label>الوصف</label><textarea id="mprod-desc" style="min-height:55px;resize:vertical"></textarea></div>
   <div class="g2">
-    <div class="fld"><label>النوع</label><select id="mprod-type" onchange="onProdTypeChange()"><option value="sculp">تمثال</option><option value="grc">GRC</option><option value="fountain">نافورة</option><option value="pool">حوض</option><option value="other">أخرى</option></select></div>
-    <div class="fld"><label>التعقيد</label><select id="mprod-complexity" onchange="updMProdPrice()"><option value="simple">بسيط</option><option value="medium" selected>متوسط</option><option value="complex">معقد</option><option value="veryComplex">شديد</option></select></div>
+    <div class="fld"><label>النوع</label><select id="mprod-type"><option value="sculp">تمثال</option><option value="grc">GRC</option><option value="fountain">نافورة</option><option value="pool">حوض</option><option value="other">أخرى</option></select></div>
+    <div class="fld"><label>التعقيد</label><select id="mprod-complexity"><option value="simple">بسيط</option><option value="medium" selected>متوسط</option><option value="complex">معقد</option><option value="veryComplex">شديد</option></select></div>
   </div>
   <div class="g3">
-    <div class="fld"><label>الطول (سم)</label><input id="mprod-l" type="number" inputmode="decimal" onchange="updMProdPrice()"/></div>
-    <div class="fld"><label>العرض (سم)</label><input id="mprod-w" type="number" inputmode="decimal" onchange="updMProdPrice()"/></div>
-    <div class="fld"><label>الارتفاع (سم)</label><input id="mprod-h" type="number" inputmode="decimal" onchange="updMProdPrice()"/></div>
+    <div class="fld"><label>الطول (سم)</label><input id="mprod-l" type="number" inputmode="decimal"/></div>
+    <div class="fld"><label>العرض (سم)</label><input id="mprod-w" type="number" inputmode="decimal"/></div>
+    <div class="fld"><label>الارتفاع (سم)</label><input id="mprod-h" type="number" inputmode="decimal"/></div>
   </div>
-  <!-- ── الخامات المستخدمة ── -->
-  <div style="margin-bottom:12px">
-    <div style="font-size:11px;font-weight:700;color:#1A6FA0;margin-bottom:6px">🧪 الخامات المستخدمة في هذا المنتج</div>
-    <div style="font-size:10px;color:#888;margin-bottom:8px">علّم الخامات المستخدمة — السعر يتحسب منها تلقائياً</div>
-    <div id="mprod-mats-list" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
-  </div>
+  <div class="fld"><label>السعر (ج) *</label><input id="mprod-price" type="number" inputmode="decimal" placeholder="0"/></div>
   <div class="fld"><label>صورة المنتج</label>
     <input type="file" id="mprod-img-file" accept="image/*" onchange="prevMProdImg(this)" style="padding:6px"/>
     <div id="mprod-img-prev" style="margin-top:6px"></div>
     <input type="hidden" id="mprod-img-data"/>
   </div>
-  <div id="mprod-price-prev" style="display:none;background:rgba(26,111,160,0.1);border:1px solid rgba(26,111,160,0.2);border-radius:9px;padding:10px;text-align:center;margin-bottom:12px;font-size:16px;font-weight:800;color:#1A6FA0"></div>
   <div class="fld"><label>رابط نموذج 3D (اختياري .glb)</label><input id="mprod-3d" placeholder="https://...model.glb" dir="ltr"/></div>
   <div style="font-size:10px;color:#888;margin:-6px 0 10px;line-height:1.6">💡 ارفع ملف .glb على <a href="https://meshy.ai" target="_blank" style="color:#1A6FA0">meshy.ai</a> أو <a href="https://tripo3d.ai" target="_blank" style="color:#1A6FA0">tripo3d.ai</a> وانسخ الرابط هنا</div>
   <button class="btn bg bfull" onclick="saveProd()">حفظ المنتج</button>
@@ -857,7 +851,7 @@ function calcSculp(){
   var finC=toKgl(f.dkg,f.du||f.dk||'كيلو')*(m.duco?m.duco.price:80)+ducoMfg+toKgl(f.skg,f.su)*(m.stouk?m.stouk.price:30)+toKgl(f.vkg,f.vu)*(m.varnish?m.varnish.price:90)+getAcrylicPrice()+toKgl(f.okg,f.ou)*(m.other?m.other.price:0)+(+f.tqty||1)*(m.tools?m.tools.price:50);
   // خامات مضافة
   Object.entries(S.mats).forEach(function(kv){var k=kv[0],mat=kv[1];if(mat.group=='custom'||k.startsWith('cx_')){var fkey='cx_'+k;finC+=(+f[fkey]||0)*mat.price}});
-  var lbC=(+f.ldays||2)*(+f.lpday||300)*lbF*qty;
+  var lbC=(+f.ldays||2)*(+f.lpday||300)*lbF;
   var exC=((+f.pkg||0)+(+f.ship||0))*qty;
   var tot=fC*qty+molC+finC*qty+lbC+exC;
   var pr=tot*((+f.margin||60)/100);
@@ -909,7 +903,7 @@ function rSculp(){
   h+='<div class="fld"><label>الكمية (قطعة)</label><input type="number" min="1" value="'+(f.qty||1)+'" onchange="sfnR(\'qty\',this.value)"/></div>';
   h+='</div>';
   var qty=+f.qty||1;
-  if(qty>1)h+='<div style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:8px;font-size:11px;color:#C9A84C;margin-bottom:4px">⚙️ الكمية '+qty+' قطعة — أيام العمل والقالب محسوبين على الكمية كلها</div>';
+  if(qty>1)h+='<div style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:8px;font-size:11px;color:#C9A84C;margin-bottom:4px">⚙️ الكمية '+qty+' قطعة — القالب محسوب على الكمية كلها، وأيام العمل المُدخلة هي إجمالي مدة تنفيذ كل القطع معاً (وليست لكل قطعة)</div>';
   h+='</div>';
   // فيبر أو GRC
   if(isGRC){
@@ -984,10 +978,9 @@ function rSculp(){
   // عمالة
   h+='<div class="card" style="background:rgba(155,111,224,0.05);border-color:rgba(155,111,224,0.2);margin-bottom:10px">';
   h+='<div style="font-size:11px;font-weight:700;color:#9B6FE0;margin-bottom:8px">👷 عمالة</div><div class="g2">';
-  h+='<div class="fld"><label>أيام العمل (لكل قطعة)</label><input type="number" inputmode="decimal" value="'+(f.ldays||2)+'" onchange="sfn(\'ldays\',this.value)"/></div>';
+  h+='<div class="fld"><label>أيام العمل (إجمالي للكمية كلها)</label><input type="number" inputmode="decimal" value="'+(f.ldays||2)+'" onchange="sfn(\'ldays\',this.value)"/></div>';
   h+='<div class="fld"><label>تكلفة اليوم (ج)</label><input type="number" inputmode="decimal" value="'+(f.lpday||300)+'" onchange="sfn(\'lpday\',this.value)"/></div>';
   h+='</div>';
-  h+='<div style="font-size:11px;color:#9B6FE0;margin-top:4px">إجمالي أيام العمل: <b>'+(+f.ldays*qty)+'</b> يوم ('+(f.ldays||2)+' x '+qty+' قطعة)</div>';
   h+='<div style="font-size:11px;color:#555;margin-top:4px">تكلفة العمالة الإجمالية: <span style="color:#9B6FE0;font-weight:700">'+fmt(c.lbC)+' ج</span></div>';
   h+='</div>';
   // نقل + تغليف
@@ -1003,7 +996,7 @@ function rSculp(){
   h+=row('خامات الفيبر',fmt(c.fC)+' ج','#E05555');
   if(f.newmold)h+=row('جبس القالب (×'+qty+')',fmt(c.molC)+' ج','#E05555');
   h+=row('التشطيب والتلوين',fmt(c.finC)+' ج','#E05555');
-  h+=row('عمالة ('+(+f.ldays*qty)+' يوم)',fmt(c.lbC)+' ج','#E05555');
+  h+=row('عمالة ('+(f.ldays||2)+' يوم)',fmt(c.lbC)+' ج','#E05555');
   h+=row('نقل + تغليف',fmt(c.exC)+' ج','#E05555');
   h+=row('هامش الربح '+f.margin+'%',fmt(c.pr)+' ج','#4DC97A');
   if(qty>1)h+=row('سعر القطعة الواحدة',fmt(c.perU)+' ج','#C9A84C');
@@ -1569,10 +1562,6 @@ function rCatalog(){
     arr.forEach(function(kv){
       var k=kv[0],p=kv[1];
       var icon=p.type=='sculp'?'🗿':p.type=='grc'?'🏛️':p.type=='fountain'?'⛲':p.type=='pool'?'🏊':'🔷';
-      // حساب السعر live من الخامات الحالية
-      var livePrice=0;
-      if(p.l&&p.w){livePrice=calcProdPrice(p.l/100,p.w/100,(p.h||0)/100,p.type||'sculp',p.complexity||'medium',p.usedMats||defMatsForType(p.type||'sculp'));}
-      var priceChanged=livePrice>0&&p.price&&Math.abs(livePrice-p.price)>50;
       h+='<div class="card" style="margin-bottom:9px"><div style="display:flex;gap:10px;align-items:flex-start">';
       if(p.img){h+='<img src="'+p.img+'" style="width:70px;height:70px;object-fit:cover;border-radius:9px;flex-shrink:0"/>';}
       else{h+='<div style="width:70px;height:70px;background:#D6EEF8;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;border:1px solid #B8D8EC">'+icon+'</div>';}
@@ -1580,29 +1569,9 @@ function rCatalog(){
       h+='<div style="font-size:13px;font-weight:700;color:#1A2A3A">'+esc(p.name)+'</div>';
       if(p.desc)h+='<div style="font-size:10px;color:#666;margin-top:1px">'+esc(p.desc)+'</div>';
       h+='<div style="font-size:10px;color:#888;margin-top:2px">📐 '+esc(p.dims||'')+'</div>';
-      // عرض الخامات المستخدمة كـ badges
-      if(p.usedMats&&p.usedMats.length>0){
-        var iconMap={fiber:'🧴',mat:'🪡',hardener:'⚗️',duco:'🎨',stouk:'🪣',varnish:'✨',acrylic:'🔲',gypsum:'🪨',tools:'🔧',other:'📦',grc_cement:'🏗️',grc_sand:'🏖️',grc_glass:'🔩',grc_steel:'⚙️',mold_gypsum:'🧱',mold_rubber:'🟤',mold_fiber:'🧪'};
-        h+='<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:5px">';
-        p.usedMats.forEach(function(mk){
-          var mat=S.mats[mk];if(!mat)return;
-          var ico=iconMap[mk]||'🔹';
-          h+='<span style="display:inline-flex;align-items:center;gap:2px;background:rgba(26,111,160,0.1);border:1px solid rgba(26,111,160,0.2);border-radius:20px;padding:2px 7px;font-size:9px;font-weight:700;color:#1A6FA0">'+ico+' '+esc(mat.name)+'</span>';
-        });
-        h+='</div>';
-      }
-      if(livePrice>0){
-        h+='<div style="margin-top:4px">';
-        h+='<span style="font-size:16px;font-weight:800;color:#1A6FA0">'+fmt(livePrice)+' ج</span>';
-        h+=' <span style="font-size:9px;color:#4DC97A;font-weight:700">● سعر حي</span>';
-        if(priceChanged)h+='<div style="font-size:9px;color:#E09840;margin-top:1px">⚠️ تغيّر من '+fmt(p.price)+' ج (محفوظ قديم)</div>';
-        h+='</div>';
-      } else if(p.price){
-        h+='<div style="font-size:16px;font-weight:800;color:#1A6FA0;margin-top:4px">'+fmt(p.price)+' ج <span style="font-size:9px;color:#888;font-weight:400">(محفوظ)</span></div>';
-      }
+      if(p.price)h+='<div style="font-size:16px;font-weight:800;color:#1A6FA0;margin-top:4px">'+fmt(p.price)+' ج</div>';
       h+='<div style="display:flex;gap:6px;margin-top:7px">';
       h+='<button class="btn bo" style="padding:4px 10px;font-size:10px" id="ep_'+k+'" onclick="editProd(this.id.slice(3))">✏️ تعديل</button>';
-      if(priceChanged)h+='<button class="btn bgr" style="padding:4px 10px;font-size:10px" onclick="updProdPrice(\''+k+'\','+livePrice+')">💾 حفظ السعر الجديد</button>';
       h+='<button class="btn br" style="padding:4px 10px;font-size:10px" id="dp_'+k+'" onclick="delProd(this.id.slice(3))">🗑️</button>';
       h+='</div></div></div></div>';
     });
@@ -1702,21 +1671,16 @@ function quickAddPDF(idx){
     document.getElementById('mprod-img-prev').innerHTML='';
   }
   document.getElementById('mprod-3d').value='';
-  // خامات افتراضية حسب النوع
-  renderMatsList(defMatsForType(p.type||'sculp'));
-  updMProdPrice();
+  document.getElementById('mprod-price').value='';
   om('m-prod');
 }
 function openAddProd(){
   document.getElementById('mprod-title').textContent='➕ منتج جديد';
   document.getElementById('m-prod').classList.add('on');
   document.getElementById('mprod-key').value='';
-  ['mprod-name','mprod-desc','mprod-l','mprod-w','mprod-h','mprod-3d'].forEach(function(id){document.getElementById(id).value=''});
+  ['mprod-name','mprod-desc','mprod-l','mprod-w','mprod-h','mprod-3d','mprod-price'].forEach(function(id){document.getElementById(id).value=''});
   document.getElementById('mprod-img-prev').innerHTML='';
   document.getElementById('mprod-img-data').value='';
-  document.getElementById('mprod-price-prev').style.display='none';
-  // خامات افتراضية للتمثال
-  renderMatsList(defMatsForType('sculp'));
 }
 function editProd(k){
   var p=S.catalog[k];if(!p)return;
@@ -1733,10 +1697,7 @@ function editProd(k){
   document.getElementById('mprod-3d').value=p.model3d||'';
   if(p.img){document.getElementById('mprod-img-prev').innerHTML='<img src="'+p.img+'" style="width:100%;border-radius:9px;max-height:150px;object-fit:cover"/>';}
   else{document.getElementById('mprod-img-prev').innerHTML='';}
-  // تحميل الخامات المحفوظة أو الافتراضية
-  var savedMats=p.usedMats&&p.usedMats.length>0?p.usedMats:defMatsForType(p.type||'sculp');
-  renderMatsList(savedMats);
-  updMProdPrice();
+  document.getElementById('mprod-price').value=p.price||'';
   om('m-prod');
 }
 
@@ -1773,130 +1734,6 @@ function prevMProdImg(inp){
     document.getElementById('mprod-img-data').value=compressed;
   });
 }
-// ── خامات افتراضية للمنتج حسب نوعه ──
-function defMatsForType(type){
-  // الخامات الأساسية المنطقية لكل نوع
-  var byType={
-    sculp:['fiber','mat','hardener','duco','stouk','varnish','tools'],
-    grc:['grc_cement','grc_sand','grc_glass','grc_steel','tools'],
-    fountain:['fiber','mat','hardener','duco','varnish','tools'],
-    pool:['fiber','mat','hardener','duco','varnish','tools'],
-    other:['fiber','mat','hardener','duco','varnish','tools']
-  };
-  return byType[type]||byType['sculp'];
-}
-
-// ── رسم قائمة checkboxes الخامات في المودال ──
-function renderMatsList(selectedKeys){
-  var m=S.mats;
-  var keys=Object.keys(m);
-  // ترتيب: الخامات الأساسية أولاً ثم المضافة
-  var stdOrder=['fiber','mat','hardener','duco','stouk','varnish','acrylic','gypsum','tools','other','grc_cement','grc_sand','grc_glass','grc_steel','mold_gypsum','mold_rubber','mold_fiber'];
-  var ordered=stdOrder.filter(function(k){return m[k]});
-  var extras=keys.filter(function(k){return stdOrder.indexOf(k)<0});
-  var allKeys=ordered.concat(extras);
-
-  var iconMap={fiber:'🧴',mat:'🪡',hardener:'⚗️',duco:'🎨',stouk:'🪣',varnish:'✨',acrylic:'🔲',gypsum:'🪨',tools:'🔧',other:'📦',grc_cement:'🏗️',grc_sand:'🏖️',grc_glass:'🔩',grc_steel:'⚙️',mold_gypsum:'🧱',mold_rubber:'🟤',mold_fiber:'🧪'};
-  var h='';
-  allKeys.forEach(function(k){
-    var mat=m[k];if(!mat)return;
-    var checked=selectedKeys&&selectedKeys.indexOf(k)>=0;
-    var icon=iconMap[k]||'🔹';
-    h+='<label onclick="updMProdPrice()" style="display:flex;align-items:center;gap:7px;background:'+(checked?'rgba(26,111,160,0.12)':'rgba(255,255,255,0.7)')+';border:1px solid '+(checked?'#1A6FA0':'#B8D8EC')+';border-radius:9px;padding:7px 9px;cursor:pointer;transition:all .15s">';
-    h+='<input type="checkbox" data-matkey="'+k+'" '+(checked?'checked':'')+' style="width:15px;height:15px;accent-color:#1A6FA0;flex-shrink:0" onchange="onMatCheck(this)"/>';
-    h+='<span style="font-size:12px">'+icon+'</span>';
-    h+='<span style="font-size:11px;font-weight:700;color:#1A2A3A;flex:1;line-height:1.3">'+esc(mat.name)+'</span>';
-    h+='<span style="font-size:9px;color:#888;white-space:nowrap">'+fmt(mat.price)+' ج</span>';
-    h+='</label>';
-  });
-  document.getElementById('mprod-mats-list').innerHTML=h||'<div style="color:#888;font-size:11px">لا توجد خامات</div>';
-}
-
-function onProdTypeChange(){
-  var type=document.getElementById('mprod-type').value;
-  // الحصول على الخامات المختارة الحالية
-  var currentChecked=getCheckedMats();
-  // لو مفيش خامات مختارة أو النوع اتغير من نوع لنوع مختلف جداً → رسم الافتراضي للنوع الجديد
-  if(currentChecked.length===0){
-    renderMatsList(defMatsForType(type));
-  } else {
-    // إعادة رسم الكل مع الاحتفاظ بالمختار
-    renderMatsList(currentChecked);
-  }
-  updMProdPrice();
-}
-
-function onMatCheck(cb){
-  // تحديث لون الـ label عند التغيير
-  var lbl=cb.closest('label');
-  if(lbl){
-    lbl.style.background=cb.checked?'rgba(26,111,160,0.12)':'rgba(255,255,255,0.7)';
-    lbl.style.borderColor=cb.checked?'#1A6FA0':'#B8D8EC';
-  }
-  updMProdPrice();
-}
-
-// ── جمع الخامات المختارة من المودال ──
-function getCheckedMats(){
-  var keys=[];
-  document.querySelectorAll('#mprod-mats-list input[type=checkbox]').forEach(function(cb){
-    if(cb.checked)keys.push(cb.dataset.matkey);
-  });
-  return keys;
-}
-
-function calcProdPrice(L,W,H,type,comp,usedMatsKeys){
-  var m=S.mats;
-  var catMargin=(S.payConf&&S.payConf.catMargin!==undefined)?+S.payConf.catMargin:40;
-  var lbF={simple:.7,medium:1,complex:1.5,veryComplex:2.2}[comp]||1;
-  var surf=type=='grc'?L*W*1.3:2*(L*W+L*H+W*H)*1.3;
-  var totF=surf*.005*1e6*1.6/1000;
-
-  // تحديد الخامات المستخدمة فعلاً
-  var used=usedMatsKeys&&usedMatsKeys.length>0?usedMatsKeys:defMatsForType(type);
-
-  function inUse(k){return used.indexOf(k)>=0;}
-  function mp(k,def){return(m[k]&&inUse(k))?m[k].price:0;}
-
-  // خامات الفيبر (محسوبة بالكميات)
-  var fC=0;
-  if(type==='grc'){
-    var vol=surf*.005;
-    fC+=(vol*400)*(m.grc_cement&&inUse('grc_cement')?m.grc_cement.price:0);
-    fC+=(vol*600)*(m.grc_sand&&inUse('grc_sand')?m.grc_sand.price:0);
-    fC+=(surf*2)*(m.grc_glass&&inUse('grc_glass')?m.grc_glass.price:0);
-    fC+=(surf*1.5)*(m.grc_steel&&inUse('grc_steel')?m.grc_steel.price:0);
-  } else {
-    fC=totF*.55*mp('fiber',45)+totF*.4*mp('mat',35)+totF*.05*mp('hardener',20);
-  }
-
-  // خامات التشطيب (كميات ثابتة بسيطة)
-  var finC=mp('duco',80)*.3+mp('stouk',30)*.2+mp('varnish',90)*.2+mp('tools',50);
-
-  // خامات مضافة (extras) — أسعار ثابتة تُضاف مباشرة
-  Object.keys(m).forEach(function(k){
-    var stdKeys=['fiber','mat','hardener','duco','stouk','varnish','acrylic','gypsum','tools','other','grc_cement','grc_sand','grc_glass','grc_steel'];
-    if(stdKeys.indexOf(k)<0&&inUse(k)){finC+=m[k].price||0;}
-  });
-
-  var lbC=2*(S.sf&&S.sf.lpday||300)*lbF;
-  return Math.round((fC+finC+lbC)*(1+catMargin/100));
-}
-
-function updMProdPrice(){
-  var L=(+document.getElementById('mprod-l').value||0)/100;
-  var W=(+document.getElementById('mprod-w').value||0)/100;
-  var H=(+document.getElementById('mprod-h').value||0)/100;
-  if(!L||!W){document.getElementById('mprod-price-prev').style.display='none';return;}
-  var type=document.getElementById('mprod-type').value;
-  var comp=document.getElementById('mprod-complexity').value;
-  var usedMats=getCheckedMats();
-  var p=calcProdPrice(L,W,H,type,comp,usedMats);
-  var el=document.getElementById('mprod-price-prev');
-  var matsCount=usedMats.length;
-  el.innerHTML='السعر المحسوب: <b>'+fmt(p)+'</b> ج'+(matsCount>0?'<div style="font-size:10px;color:#4DC97A;font-weight:700;margin-top:3px">من '+matsCount+' خامة مختارة</div>':'');
-  el.style.display='block';
-}
 function saveProd(){
   var name=document.getElementById('mprod-name').value.trim();
   if(!name){toast('أدخل اسم المنتج');return;}
@@ -1905,9 +1742,9 @@ function saveProd(){
   var H=+document.getElementById('mprod-h').value||0;
   var type=document.getElementById('mprod-type').value;
   var comp=document.getElementById('mprod-complexity').value;
-  var usedMats=getCheckedMats();
-  var pr=L&&W?calcProdPrice(L/100,W/100,H/100,type,comp,usedMats):0;
-  var obj={name:name,desc:document.getElementById('mprod-desc').value,type:type,complexity:comp,l:L,w:W,h:H,dims:L+'x'+W+(H?'x'+H:'')+' سم',price:pr,usedMats:usedMats,img:document.getElementById('mprod-img-data').value,model3d:document.getElementById('mprod-3d').value||'',active:true,updAt:Date.now()};
+  var pr=+document.getElementById('mprod-price').value||0;
+  if(!pr){toast('⚠️ أدخل سعر المنتج');return;}
+  var obj={name:name,desc:document.getElementById('mprod-desc').value,type:type,complexity:comp,l:L,w:W,h:H,dims:L+'x'+W+(H?'x'+H:'')+' سم',price:pr,img:document.getElementById('mprod-img-data').value,model3d:document.getElementById('mprod-3d').value||'',active:true,updAt:Date.now()};
   var k=document.getElementById('mprod-key').value;
   if(k){S.catalog[k]=obj;fbSet('/data/catalog/'+k,obj,function(){toast('تم التحديث');cm('m-prod');rCatalog();});}
   else{fbPush('/data/catalog',obj,function(nk){S.catalog[nk]=obj;toast('تمت الإضافة');cm('m-prod');rCatalog();});}
@@ -1916,11 +1753,6 @@ function delProd(k){
   if(!confirm('حذف المنتج؟'))return;
   delete S.catalog[k];
   fbDel('/data/catalog/'+k,function(){toast('تم الحذف');rCatalog();});
-}
-function updProdPrice(k,newPrice){
-  if(!S.catalog[k])return;
-  S.catalog[k].price=newPrice;
-  fbSet('/data/catalog/'+k+'/price',newPrice,function(){toast('✅ تم تحديث السعر');rCatalog();});
 }
 function openPayConf(){
   var pc=S.payConf;
