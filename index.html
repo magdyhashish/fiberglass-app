@@ -300,6 +300,16 @@ select option{background:#fff;color:#1A2A3A}
   <button class="btn bo bfull" style="margin-top:8px" onclick="cm('m-bulk')">إغلاق</button>
 </div></div>
 
+<!-- Modal: إضافة إيراد -->
+<div id="m-rev" class="mb" onclick="if(event.target===this)cm('m-rev')">
+<div class="md"><h3>💰 إضافة إيراد</h3>
+  <div class="fld"><label>المصدر / الوصف *</label><input id="rv-name" placeholder="مثال: مشروع فيلا الشيخ زايد"/></div>
+  <div class="fld"><label>المبلغ (ج) *</label><input id="rv-amt" type="number" inputmode="decimal" placeholder="0"/></div>
+  <div class="fld"><label>التاريخ</label><input id="rv-date" type="date"/></div>
+  <button class="btn bg bfull" onclick="saveRev()">💾 إضافة</button>
+  <button class="btn bo bfull" style="margin-top:8px" onclick="cm('m-rev')">إغلاق</button>
+</div></div>
+
 <!-- Modal: مشروع جديد -->
 <div id="m-proj" class="mb" onclick="if(event.target===this)cm('m-proj')">
 <div class="md"><h3>🏗️ مشروع جديد</h3>
@@ -493,7 +503,7 @@ var EM_BODY='السادة المحترمين،\n\nيسعدنا تقديم خدم
 
 // ── state ──
 var S={
-  expenses:{}, debt:{}, mats:JSON.parse(JSON.stringify(DEF_MATS)),
+  expenses:{}, debt:{}, revenues:{}, mats:JSON.parse(JSON.stringify(DEF_MATS)),
   clients:{}, revenue:'', sculps:{},
   sf:JSON.parse(JSON.stringify(DEF_SCULP)),
   waMsg:'السلام عليكم،\n\nمتخصصون في أعمال الفايبرجلاس وGRC:\n🏊 أحواض سباحة\n🏛️ واجهات GRC\n🗿 تماثيل ومجسمات\n💧 نوافير وبرك\n\nجودة عالية مع ضمان ✅\nعرض سعر مجاني 🤝',
@@ -593,6 +603,7 @@ function initApp() {
         S.clients = {};
       }
       if (data.revenue) S.revenue = data.revenue;
+      if (data.revenues) S.revenues = data.revenues;
       if (data.sculps) S.sculps = data.sculps;
       if (data.projects) S.projects = data.projects;
       if (data.revDist) S.revDist = data.revDist;
@@ -662,7 +673,9 @@ function rDash(){
   var dbtArr=Object.values(S.debt||{});
   var exp=expArr.reduce(function(a,e){return a+(+e.amount||0)},0);
   var dbt=dbtArr.reduce(function(a,d){return a+(+d.remaining||0)},0);
-  var rev=+S.revenue||0;
+  var revArr=Object.values(S.revenues||{});
+  var rev=revArr.reduce(function(a,r){return a+(+r.amount||0)},0);
+  if(rev===0 && +S.revenue>0) rev=+S.revenue;
   var n1=rev-exp; var dp=Math.max(0,n1*.3); var nf=n1-dp;
   var stats=[['💰','الإيرادات',rev,'#1A6FA0'],['📉','المصروفات',exp,'#E05555'],['💳','المديونية',dbt,'#E09840'],['📈','صافي الربح',nf,nf>=0?'#1E8449':'#E05555']];
   var cats=[['سداد المديونية (30%)',rev*.3,'#E05555',30],['احتياطي رأس المال (20%)',rev*.2,'#1A6FA0',20],['تطوير الشغل (20%)',rev*.2,'#6B3FA0',20],['الالتزامات (20%)',rev*.2,'#E09840',20],['أرباحك الشخصية (10%)',rev*.1,'#1E8449',10]];
@@ -689,19 +702,45 @@ function rDash(){
 function rFin(){
   var expArr=Object.entries(S.expenses||{});
   var dbtArr=Object.entries(S.debt||{});
-  var rev=+S.revenue||0;
+  var revArr=Object.entries(S.revenues||{});
+  var rev=revArr.reduce(function(a,e){return a+(+e[1].amount||0)},0);
+  // دعم القيمة القديمة للإيراد لو مفيش revenues
+  if(rev===0 && +S.revenue>0) rev=+S.revenue;
   var exp=expArr.reduce(function(a,e){return a+(+e[1].amount||0)},0);
   var n1=rev-exp; var dp=Math.max(0,n1*.3); var nf=n1-dp;
   var dbt=dbtArr.reduce(function(a,d){return a+(+d[1].remaining||0)},0);
   var ETYPE={salary:'مرتبات',rent:'إيجار',utility:'فواتير',material:'خامات',other:'أخرى'};
   var ECOL={salary:'#5888E0',rent:'#E09840',utility:'#9B6FE0',material:'#4DC97A',other:'#9E9880'};
   var h='<div style="font-size:14px;font-weight:700;margin-bottom:14px">💰 الحسابات الشهرية</div>';
-  h+='<div class="card g"><div style="font-size:11px;font-weight:700;color:#C9A84C;margin-bottom:8px">إيراد الشهر الحالي</div>';
-  h+='<div style="display:flex;gap:8px;align-items:center"><input type="number" id="rev-in" style="flex:1;font-size:18px;font-weight:800;text-align:center;direction:ltr" placeholder="0" value="'+esc(S.revenue||'')+'" oninput="S.revenue=this.value;save(\'revenue\',this.value)"/> <span style="color:#C9A84C;font-weight:700">ج</span></div></div>';
+
+  // ── قسم الإيرادات ──
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+  h+='<div style="font-size:13px;font-weight:700">💰 الإيرادات</div>';
+  h+='<button class="btn bg bsm" onclick="openRevModal()">+ إضافة إيراد</button></div>';
+
+  if(revArr.length===0 && !(+S.revenue>0)){
+    h+='<div class="card"><div style="text-align:center;padding:14px;color:#555;font-size:12px">لا يوجد إيرادات مسجلة</div></div>';
+  } else {
+    // عرض الإيرادات المتعددة
+    revArr.forEach(function(kv){
+      var k=kv[0],r=kv[1];
+      h+='<div style="background:rgba(255,255,255,0.75);border:1px solid rgba(26,111,160,0.2);border-radius:12px;padding:11px 14px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center">';
+      h+='<div><div style="font-size:13px;font-weight:700">'+esc(r.name)+'</div>';
+      if(r.date){h+='<div style="font-size:10px;color:#888">'+esc(r.date)+'</div>';}
+      h+='</div>';
+      h+='<div style="display:flex;align-items:center;gap:8px"><span style="font-size:15px;font-weight:800;color:#1A6FA0">'+fmt(r.amount)+' ج</span>';
+      h+='<button class="btn bsm br" onclick="delRev(\''+k+'\')">🗑️</button></div></div>';
+    });
+    // إجمالي الإيرادات
+    h+='<div style="background:rgba(26,111,160,0.08);border:1px solid rgba(26,111,160,0.3);border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;margin-bottom:14px">';
+    h+='<span style="font-size:12px;font-weight:700">إجمالي الإيرادات</span>';
+    h+='<span style="font-size:15px;font-weight:800;color:#1A6FA0">'+fmt(rev)+' ج</span></div>';
+  }
+
   if(rev>0){
     h+='<div class="card" style="margin-bottom:12px"><div style="font-size:12px;font-weight:700;margin-bottom:10px">📊 ملخص الشهر</div>';
-    var rows=[['الإيراد',rev,'#C9A84C'],['المصروفات',-exp,'#E05555'],['صافي قبل المديونية',n1,n1>=0?'#4DC97A':'#E05555'],['سداد مديونية (30%)',-dp,'#E09840'],['صافي الربح النهائي',nf,nf>=0?'#4DC97A':'#E05555']];
-    rows.forEach(function(r,i){h+='<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:'+(i<4?'1px solid #222':'none')+';font-size:12px"><span style="color:#999">'+r[0]+'</span><span style="font-weight:700;color:'+r[2]+'">'+(r[1]<0?'- ':'')+fmt(Math.abs(r[1]))+' ج</span></div>'});
+    var rows=[['الإيراد',rev,'#1A6FA0'],['المصروفات',-exp,'#E05555'],['صافي قبل المديونية',n1,n1>=0?'#4DC97A':'#E05555'],['سداد مديونية (30%)',-dp,'#E09840'],['صافي الربح النهائي',nf,nf>=0?'#4DC97A':'#E05555']];
+    rows.forEach(function(r,i){h+='<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:'+(i<4?'1px solid rgba(0,0,0,0.06)':'none')+';font-size:12px"><span style="color:#555">'+r[0]+'</span><span style="font-weight:700;color:'+r[2]+'">'+(r[1]<0?'- ':'')+fmt(Math.abs(r[1]))+' ج</span></div>'});
     h+='</div>';
   }
   h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:13px;font-weight:700">📋 المصروفات</div><button class="btn bg bsm" onclick="om(\'m-exp\')">+ إضافة</button></div>';
@@ -719,6 +758,41 @@ function delExp(k){delete S.expenses[k];fbDel('/data/expenses/'+k,function(){rFi
 function saveDebt(){var n=document.getElementById('d-name').value.trim(),t=document.getElementById('d-tot').value,r=document.getElementById('d-rem').value,m=document.getElementById('d-mon').value;if(!n||!t){toast('⚠️ أدخل البيانات');return}var obj={name:n,total:+t,remaining:+r||+t,monthly:+m||0};fbPush('/data/debt',obj,function(k){S.debt[k]=obj;cm('m-debt');['d-name','d-tot','d-rem','d-mon'].forEach(function(id){document.getElementById(id).value=''});toast('✅ تم');rFin()})}
 function delDebt(k){delete S.debt[k];fbDel('/data/debt/'+k,function(){rFin()})}
 function payD(k,amt){S.debt[k].remaining=Math.max(0,(+S.debt[k].remaining||0)-amt);fbSet('/data/debt/'+k+'/remaining',S.debt[k].remaining,function(){toast('✅ خصم '+fmt(amt)+' ج');rFin()})}
+
+function openRevModal(){
+  // ضع تاريخ اليوم تلقائياً
+  var d=new Date();
+  var ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  var di=document.getElementById('rv-date');
+  if(di&&!di.value)di.value=ds;
+  om('m-rev');
+}
+function saveRev(){
+  var n=document.getElementById('rv-name').value.trim();
+  var a=document.getElementById('rv-amt').value;
+  var dt=document.getElementById('rv-date').value;
+  if(!n||!a){toast('⚠️ أدخل الوصف والمبلغ');return;}
+  if(!S.revenues)S.revenues={};
+  var obj={name:n,amount:+a,date:dt||''};
+  fbPush('/data/revenues',obj,function(k){
+    S.revenues[k]=obj;
+    cm('m-rev');
+    document.getElementById('rv-name').value='';
+    document.getElementById('rv-amt').value='';
+    document.getElementById('rv-date').value='';
+    toast('✅ تم إضافة الإيراد');
+    rFin();
+    rDash();
+  });
+}
+function delRev(k){
+  delete S.revenues[k];
+  fbDel('/data/revenues/'+k,function(){
+    toast('🗑️ تم الحذف');
+    rFin();
+    rDash();
+  });
+}
 
 // ── MATERIALS ──
 function rMats(){
@@ -1946,7 +2020,7 @@ updateOnlineStatus();
 
 // ── تحديث تلقائي ──
 (function(){
-  var APP_VERSION = '2026061601';
+  var APP_VERSION = '2026062501';
 
   // مسح أي Service Worker قديم فوراً
   if('serviceWorker' in navigator){
@@ -1993,6 +2067,7 @@ updateOnlineStatus();
       }
       safeSave('clients',    S.clients);
       safeSave('expenses',   S.expenses);
+      safeSave('revenues',   S.revenues);
       safeSave('debt',       S.debt);
       safeSave('revenue',    S.revenue);
       safeSave('mats',       S.mats);
